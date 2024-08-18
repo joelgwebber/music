@@ -3,6 +3,41 @@ Server.local.boot;
 "lib/instruments.scd".load;
 )
 
+
+(
+c = Diatonic(3, 3, [4, 3]);
+c.inversion = 1;
+c.names;
+)
+
+
+/*
+Skyrim - Awake
+
+c      C  Eb G
+g      G  Bb D
+c      C  Eb G
+g      G  Bb D
+Ebmaj7 Eb Bb D  G
+F      F  A  C
+gsus4  G  C  D
+G      G  B  D
+G7     G  B  D  F
+
+   A♮----E♮
+  /  \  /  \
+F♮----C♮----G♮----D♮----A♮
+        \  /  \  /  \  /  \
+         E♭----B♭----F♮----C♮
+
+*/
+(
+var cm = Diatonic(1, 3, [3, 4]);
+var gm = cm.up(2);
+var ebmaj7 = gm.extendDown();
+)
+
+
 // Canon in D
 // D - A - Bm - F#m - G - D - G - A
 (

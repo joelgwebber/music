@@ -56,12 +56,12 @@ Diatonic : Chord {
   }
 
   // TODO:: Validate root and intervals against tonic.
-  *new { |tonic, root, intervals, octave = 0|
-    ^super.new.init(tonic, root, intervals, octave);
+  *new { |tonic, root, intervals, octave = 0, inversion = 0|
+    ^super.new.init(tonic, root, intervals, octave, inversion);
   }
 
-  init { |inTonic, inRoot, inIntervals, inOctave|
-    super.init(inRoot, inIntervals, inOctave, Tuning.at(\et12));
+  init { |inTonic, inRoot, inIntervals, inOctave, inVersion|
+    super.init(inRoot, inIntervals, inOctave, inVersion, Tuning.at(\et12));
     tonic = inTonic;
   }
 

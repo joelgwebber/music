@@ -1,12 +1,8 @@
 // Represents any group of notes, in any tuning, related by intervals.
 //
-// TODO:
-// - Octave is kind of a dumb name for non-diatonic scales. Powers? Exponents?
-// - Parameterize root frequency.
-// - Support inversions. Maybe as extra parameter to preserve intervals?
-// - ...
+// TODO: Parameterize root frequency.
 Chord {
-  var <root, <intervals, <octave, <tuning;
+  var <>root, <>intervals, <>octave, <>inversion, <tuning;
 
   *pitchClass{ |note, pitches|
     var sign = note.sign;
@@ -18,14 +14,15 @@ Chord {
     ;
   }
 
-  *new { |root, intervals, octave = 0, tuning = (Tuning.at(\et12))|
-    ^super.new.init(root, intervals, octave, tuning);
+  *new { |root, intervals, octave = 0, inversion = 0, tuning = (Tuning.at(\et12))|
+    ^super.new.init(root, intervals, octave, inversion, tuning);
   }
 
-  init { |inRoot, inIntervals, inOctave, inTuning|
+  init { |inRoot, inIntervals, inOctave, inVersion, inTuning|
     root = inRoot;
     intervals = inIntervals;
     octave = inOctave;
+    inversion = inVersion;
     tuning = inTuning;
   }
 
@@ -37,7 +34,7 @@ Chord {
       curNote = curNote + interval;
       notes.add(curNote);
     });
-    ^notes;
+    ^notes.rotate(inversion);
   }
 
   // Returns an ordered array of frequencies in these Intervals.

@@ -35,8 +35,8 @@ Chromatic : Chord {
       {i}, i <- intervals};
   }
 
-  *new { |root, intervals, octave = 0|
-    ^super.new.init(root, intervals, octave, Tuning.at(\et12));
+  *new { |root, intervals, octave = 0, inversion = 0|
+    ^super.new.init(root, intervals, octave, inversion, Tuning.at(\et12));
   }
 
   // Returns an arraw of this chord's note names.
@@ -57,6 +57,17 @@ Chromatic : Chord {
     ^Chromatic(root, Chromatic.swapThirds(intervals), octave);
   }
 
+  // Up transform:
+  // Inverse of the down transform.
+  up { |steps = 1|
+    var newRoot = root, newInts = intervals;
+    steps.do {
+      newRoot = newRoot + newInts[0];
+      newInts = Chromatic.swapThirds(newInts);
+    }
+    ^Chromatic(newRoot, newInts, octave);
+  }
+
   // Down transform:
   // Returns a chord whose major and minor thirds are swapped,
   // and whose root is down a third (major or minor).
@@ -70,17 +81,5 @@ Chromatic : Chord {
     };
     ^Chromatic(newRoot, newInts, octave);
   }
-
-  // Up transform:
-  // Inverse of the down transform.
-  up { |steps = 1|
-    var newRoot = root, newInts = intervals;
-    steps.do {
-      newRoot = newRoot + newInts[0];
-      newInts = Chromatic.swapThirds(newInts);
-    }
-    ^Chromatic(newRoot, newInts, octave);
-  }
 }
-
 
