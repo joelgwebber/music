@@ -16,15 +16,12 @@
 // A♮----E♮----B♮----G♭----D♭----A♭----E♭----B♭----F♮
 //
 Chromatic : Chord {
-  classvar <names;
+  classvar <names, <tuning;
 
   *initClass {
+    Class.initClassTree(Tuning); // You'd think this wouldn't be necessary, but...
+    tuning = Tuning.at(\et12);
     names = ['A', 'A♯', 'B', 'C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯'];
-  }
-
-  // Returns the diatonic name of the given note.
-  *noteName { |note|
-    ^names[Chord.pitchClass(note, 12)];
   }
 
   // Swaps the major and minor thirds in an array of intervals.
@@ -36,19 +33,23 @@ Chromatic : Chord {
   }
 
   *new { |root, intervals, octave = 0, inversion = 0|
-    ^super.new.init(root, intervals, octave, inversion, Tuning.at(\et12));
+    ^super.new(root, intervals, octave, inversion, tuning);
   }
 
-  // Returns an arraw of this chord's note names.
-  names {
-    ^all {:Chromatic.noteName(note), note <- this.notes};
+  *newFrom { |chord|
+    ^super.new(chord.root, chord.intervals, chord.octave, chord.inversion, tuning);
   }
 
-  // Octave transform:
-  // Returns a chord whose root is adjusted by a number of octaves.
-  oct { |steps|
-    ^Chromatic(root, intervals, octave + steps);
-  }
+  // Returns an array of this chord's note names.
+  // For chromatic chords, it will always use sharps rather than flats.
+  names { ^all {:this.noteName(note), note <- this.notes} }
+
+  // Returns the diatonic name of the given note.
+  noteName { |note| ^names[this.pitchClass(note)] }
+
+  union { |other| ^Chromatic.newFrom(super.union(other)) }
+  oct { |steps| ^Chromatic(root, intervals, octave + steps, inversion) }
+  invert { |steps| ^Chromatic(root, intervals, octave, (inversion + steps) % this.size, tuning) }
 
   // Parallel transform:
   // Returns a chord whose major and minor thirds are swapped.
@@ -57,28 +58,34 @@ Chromatic : Chord {
     ^Chromatic(root, Chromatic.swapThirds(intervals), octave);
   }
 
-  // Up transform:
-  // Inverse of the down transform.
-  up { |steps = 1|
-    var newRoot = root, newInts = intervals;
-    steps.do {
-      newRoot = newRoot + newInts[0];
-      newInts = Chromatic.swapThirds(newInts);
-    }
+  // Thirds transform:
+  // Returns a chord whose root is adjusted by the specfied number of thirds,
+  //   adjusting its major/minor third intervals as necessary.
+  // This is equivalent to one of the neo-Riemannian R/L transforms,
+  //   depending upon whether the starting chord is major or minor.
+  thirds { |steps|
+    var up = steps.sign, cur = this;
+    steps = steps.abs;
+    steps.do { cur = (up > 0).if { cur.upThird } { cur.downThird } };
+    ^cur;
+  }
+
+  // TODO:doc
+  addThirds { |steps|
+    var cur = this;
+    steps.abs.do { cur = cur.union(cur.thirds(steps.sign)) };
+    ^cur;
+  }
+
+  upThird {
+    var newRoot = root + intervals[0];
+    var newInts = Chromatic.swapThirds(intervals);
     ^Chromatic(newRoot, newInts, octave);
   }
 
-  // Down transform:
-  // Returns a chord whose major and minor thirds are swapped,
-  // and whose root is down a third (major or minor).
-  // This is equivalent to one of the neo-Riemannian R/L transforms,
-  //   depending upon whether the starting chord is major or minor.
-  down { |steps = 1|
-    var newRoot = root, newInts = intervals;
-    steps.do {
-      newInts = Chromatic.swapThirds(newInts);
-      newRoot = newRoot - newInts[0];
-    };
+  downThird {
+    var newInts = Chromatic.swapThirds(intervals);
+    var newRoot = root - newInts[0];
     ^Chromatic(newRoot, newInts, octave);
   }
 }

@@ -53,6 +53,5 @@ SynthDef(\cfstring1, {|i_out, freq = 360, gate = 1, pan, amp=0.1|
     #a, b = out;
     Out.ar(i_out, Mix.ar(PanAz.ar(4, [a, b], [pan, pan+0.3])));
 }).add;
-
 )
 

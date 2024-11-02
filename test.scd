@@ -4,8 +4,8 @@ Server.local.boot;
 )
 
 (
-var maj = Chord([0, 2, 4]);
-var min = Chord([0, 1, 4]);
+var maj = Chromatic(0, [2, 2]);
+var min = Chromatic(0, [1, 3]);
 TempoClock.default.tempo = 120/60;
 p = Pbind(
     \instrument, \bass,
@@ -16,7 +16,7 @@ p = Pbind(
 )
 
 (
-var maj = Chord([0, 2, 4]);
+var maj = Chromatic(0, [4, 3]);
 p = Pbind(
     \instrument, \bass,
     \freq, Pseq(maj.freqs, inf),
@@ -73,3 +73,16 @@ p = Pxrand([
 ], inf).play(quant: 1);
 )
 
+(
+TempoClock.default.tempo = 60/60;
+p = Pbind(            // repeated notes
+        \instrument, \bass,
+        \midinote, 36,
+        \dur, Pseq([0.75, 0.25, 0.25, 0.25, 0.5], 1),
+        \legato, Pseq([0.9, 0.3, 0.3, 0.3, 0.3], 1),
+        \amp, 0.5,
+        \detune, 1.005
+    ).play(quant: 1);
+)
+
+p.stop;

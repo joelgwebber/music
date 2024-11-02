@@ -3,14 +3,6 @@ Server.local.boot;
 "lib/instruments.scd".load;
 )
 
-
-(
-c = Diatonic(3, 3, [4, 3]);
-c.inversion = 1;
-c.names;
-)
-
-
 /*
 Skyrim - Awake
 
@@ -24,33 +16,27 @@ gsus4  G  C  D
 G      G  B  D
 G7     G  B  D  F
 
-   A♮----E♮
-  /  \  /  \
+G minor (Bb major):
+
+   A♮----E♮    B♮  <- parallel
+  /  \  /  \  /  \
 F♮----C♮----G♮----D♮----A♮
         \  /  \  /  \  /  \
          E♭----B♭----F♮----C♮
-
 */
 (
-var cm = Diatonic(1, 3, [3, 4]);
-var gm = cm.up(2);
-var ebmaj7 = gm.extendDown();
-)
+var cm = Chromatic(3, [3, 4], -2);
+var gm = cm.thirds(2);
+var ebmaj7 = gm.addThirds(-1);
+var fM = cm.parallel.thirds(-2);
+var gsus4 = Chromatic(3, [7, 7], -1);
+var gM = gm.parallel();
+var g7 = gM.addThirds(1);
+var prog;
 
-
-// Canon in D
-// D - A - Bm - F#m - G - D - G - A
-(
-var dM = Diatonic(5, 5, [4, 3], -1);
-var aM = dM.up(2).oct(-1);
-var bm = aM.down(3).oct(1);
-var fsm = bm.up(2).oct(-1);
-var gM = fsm.up(4).oct(-1);
-
-var prog = [ dM, aM, bm, fsm, gM, dM.oct(-1), gM, aM ];
-
+prog = [cm, gm, cm, gm, ebmaj7, fM, gsus4, gM, g7];
 p = Pbind(
-    \instrument, \bass,
+    \instrument, \cfstring1,
     \freq, Pseq(all {:ch.freqs, ch <- prog}),
     \dur, 1,
     \amp, 0.5
@@ -59,12 +45,27 @@ p = Pbind(
 all {:ch.names, ch <- prog};
 )
 
+// Canon in D
+// D - A - Bm - F#m - G - D - G - A
+//
+// ---F#----C#
+//   /  \  /  \
+// D♮----A♮----E♮----B♮----F#----C#
+//               \  /  \  /  \  /  \
+//                G♮----D♮----A♮----E♮----B♮----F#---
+//                                    \  /  \  /  \
+//                                     G♮----D♮----A♮
 (
-var dM = Diatonic(5, 5, [4, 3], -2);
-var prog = [ dM, dM.up(1), dM.up(2), dM.up(3), dM.up(4), dM.up(5) ];
+var dM = Diatonic(5, 5, [4, 3], -1);
+var aM = dM.thirds(2).oct(-1);
+var bm = aM.thirds(-3).oct(1);
+var fsm = bm.thirds(2).oct(-1);
+var gM = fsm.thirds(4).oct(-1);
+
+var prog = [ dM, aM, bm, fsm, gM, dM.oct(-1), gM, aM ];
 
 p = Pbind(
-    \instrument, \bass,
+    \instrument, \cfstring1,
     \freq, Pseq(all {:ch.freqs, ch <- prog}),
     \dur, 1,
     \amp, 0.5

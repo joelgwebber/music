@@ -5,11 +5,11 @@
 //
 // -B♮
 //    \                                                
-//    -D♮----A♮----E♮----B♮                              
+// ----D♮----A♮----E♮----B♮                              
 //       \  /  \  /  \  /  \                           
 //        F♮----C♮----G♮----D♮----A♮----E♮----B♮
 //              ^             \  /  \  /  \  /  \
-//            tonic            F♮----C♮----G♮----D♮-
+//            tonic            F♮----C♮----G♮----D♮----
 //                                   ^             \
 //                                 tonic            F♮-
 //
@@ -17,15 +17,15 @@
 //
 // -C#
 //    \
-//    -E♮----B♮----F#----C#
+// ----E♮----B♮----F#----C#
 //       \  /  \  /  \  /  \               
-//        G♮----D♮----A♮----E♮-
+//        G♮----D♮----A♮----E♮----
 //              ^             \
 //             tonic           G♮-
 //
 // -etc-
 //
-Diatonic : Chord {
+Diatonic : Chromatic {
   classvar <upThirds, <dnThirds;
   var <tonic;
 
@@ -57,37 +57,39 @@ Diatonic : Chord {
 
   // TODO:: Validate root and intervals against tonic.
   *new { |tonic, root, intervals, octave = 0, inversion = 0|
-    ^super.new.init(tonic, root, intervals, octave, inversion);
+    ^super.new(root, intervals, octave, inversion).initDiatonic(tonic);
   }
 
-  init { |inTonic, inRoot, inIntervals, inOctave, inVersion|
-    super.init(inRoot, inIntervals, inOctave, inVersion, Tuning.at(\et12));
+  initDiatonic { |inTonic|
     tonic = inTonic;
   }
 
-  // Detach this diatonic chord from its tonic.
+  // Detach this diatonic chord from its tonic, yielding a chromatic chord that
+  // can be freely transformed across other keys.
   chromatic {
     ^Chromatic(root, intervals, octave);
   }
 
+  // Octave transform:
+  // Returns a chord whose root is adjusted by a number of octaves.
   oct { |steps|
     ^Diatonic(tonic, root, intervals, octave + steps);
   }
 
+  // Parallel transform:
+  // Returns a chord whose major and minor thirds are swapped, and its tonic adjusted
+  //   to the closest key the parallel chord can be found in.
   parallel {
     // TODO: adjust tonic and root to parallel key.
+    // - What about the diminished triad? It won't have an equivalent in another key.
     var parallelTonic = tonic;
-    var parallelRoot = root;
-    ^Diatonic(parallelTonic, parallelRoot, Chromatic.swapThirds(intervals), octave);
+    ^Diatonic(parallelTonic, root, Chromatic.swapThirds(intervals), octave);
   }
 
-  up { |steps = 1|
-    var cur = this;
-    steps.do { cur = cur.upOne() };
-    ^cur;
-  }
-
-  upOne {
+  // The diatonic implementations of upThird and downThird are similar to the chromatic
+  //   ones, except they will use diminished triads to keep the transformed chord in the
+  //   key specified by the tonic.
+  upThird {
     var newRoot = root + intervals[0];
     var note = newRoot, newInts = [];
     intervals.do { |interval|
@@ -98,13 +100,7 @@ Diatonic : Chord {
     ^Diatonic(tonic, newRoot, newInts, octave);
   }
 
-  down { |steps = 1|
-    var cur = this;
-    steps.do { cur = cur.downOne() };
-    ^cur;
-  }
-
-  downOne {
+  downThird {
     var newRoot = root - this.adjustInterval(root, intervals[0], true);
     var note = newRoot, newInts = [];
     intervals.do { |interval|
@@ -116,19 +112,15 @@ Diatonic : Chord {
   }
 
   adjustInterval{ |note, interval, down|
+    // TODO: Deal with major/minor seconds & sixths.
     ^if ((interval == 3) || (interval == 4))
         { interval = this.thirdFor(note, down) }
         { interval };
   }
 
   thirdFor { |note, down|
-    var pc = this.pitch(note - tonic);
+    var pc = this.pitchClass(note - tonic);
     ^down.if { Diatonic.dnThirds[pc] } { Diatonic.upThirds[pc] };
-  }
-
-  // Returns an arraw of this chord's note names.
-  names {
-    ^all {:Chromatic.noteName(note), note <- this.notes};
   }
 }
 
