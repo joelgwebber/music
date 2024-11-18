@@ -27,11 +27,11 @@ F♮----C♮----G♮----D♮----A♮
 (
 var cm = Chromatic(3, [3, 4], -2);
 var gm = cm.thirds(2);
-var ebmaj7 = gm.addThirds(-1);
+var ebmaj7 = gm.extend(-1);
 var fM = cm.parallel.thirds(-2);
 var gsus4 = Chromatic(3, [7, 7], -1);
 var gM = gm.parallel();
-var g7 = gM.addThirds(1);
+var g7 = gM.extend(1);
 var prog;
 
 prog = [cm, gm, cm, gm, ebmaj7, fM, gsus4, gM, g7];
@@ -39,11 +39,13 @@ p = Pbind(
     \instrument, \cfstring1,
     \freq, Pseq(all {:ch.freqs, ch <- prog}),
     \dur, 1,
+    \sustain, 1.25,
     \amp, 0.5
 ).play;
 
 all {:ch.names, ch <- prog};
 )
+p.stop;
 
 
 // Canon in D
@@ -74,5 +76,4 @@ p = Pbind(
 
 all {:ch.names, ch <- prog};
 )
-
 p.stop;

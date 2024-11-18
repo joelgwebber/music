@@ -60,20 +60,14 @@ Chromatic : Chord {
 
   // Thirds transform:
   // Returns a chord whose root is adjusted by the specfied number of thirds,
-  //   adjusting its major/minor third intervals as necessary.
+  // adjusting its major/minor third intervals as necessary.
+  //
   // This is equivalent to one of the neo-Riemannian R/L transforms,
-  //   depending upon whether the starting chord is major or minor.
+  // depending upon whether the starting chord is major or minor.
   thirds { |steps|
     var up = steps.sign, cur = this;
     steps = steps.abs;
     steps.do { cur = (up > 0).if { cur.upThird } { cur.downThird } };
-    ^cur;
-  }
-
-  // TODO:doc
-  addThirds { |steps|
-    var cur = this;
-    steps.abs.do { cur = cur.union(cur.thirds(steps.sign)) };
     ^cur;
   }
 
@@ -87,6 +81,13 @@ Chromatic : Chord {
     var newInts = Chromatic.swapThirds(intervals);
     var newRoot = root - newInts[0];
     ^Chromatic(newRoot, newInts, octave);
+  }
+
+  // TODO:doc
+  extend { |steps|
+    var cur = this;
+    steps.abs.do { cur = cur.union(cur.thirds(steps.sign)) };
+    ^cur;
   }
 }
 
