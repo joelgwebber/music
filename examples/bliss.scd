@@ -29,3 +29,5 @@ e = Pbind(
 ).play(quant:1); // returns an EventStream
 TempoClock.default.tempo = 1200/60;
 )
+e.stop;
+

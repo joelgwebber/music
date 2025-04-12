@@ -52,9 +52,9 @@ SynthDef(\tape_delay) { |in=0, out=0, imp=1, lag=3, maxLag=0.2, decayTime=6|
 
 	ReplaceOut.ar(out, newOut);
 }.add;
+)
 
-
-
+(
 Routine({
 
 	Pbind(
