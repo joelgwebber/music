@@ -89,5 +89,82 @@ Chromatic : Chord {
     steps.abs.do { cur = cur.union(cur.thirds(steps.sign)) };
     ^cur;
   }
+
+  // Neo-Riemannian transformations
+
+  // Relative transformation (R): Major <-> relative minor
+  // C major (C-E-G) -> A minor (A-C-E)
+  // A minor (A-C-E) -> C major (C-E-G)
+  relative {
+    var isMajor = (intervals[0] == 4);
+    ^isMajor.if(
+      { this.thirds(1) },  // Major to minor: up a third
+      { this.thirds(-1) }  // Minor to major: down a third
+    );
+  }
+
+  // Leading-tone exchange (L): Major <-> minor via leading tone
+  // C major (C-E-G) -> E minor (E-G-B)
+  // E minor (E-G-B) -> C major (C-E-G)
+  leadingTone {
+    var isMajor = (intervals[0] == 4);
+    ^isMajor.if(
+      { this.thirds(2) },   // Major to minor: up two thirds
+      { this.thirds(-2) }   // Minor to major: down two thirds
+    );
+  }
+
+  // Parallel transformation (P): Major <-> parallel minor
+  // C major (C-E-G) -> C minor (C-Eb-G)
+  // Already implemented above
+
+  // Slide transformation (S): slides the third
+  // C major (C-E-G) -> C# minor (C#-E-G#)
+  slide {
+    var isMajor = (intervals[0] == 4);
+    var newRoot = isMajor.if(
+      { root + 1 },  // Major: root up semitone
+      { root - 1 }   // Minor: root down semitone
+    );
+    ^Chromatic(newRoot, Chromatic.swapThirds(intervals), octave);
+  }
+
+  // Nebenverwandt (N): combines R, L, and P
+  // C major -> Eb major
+  nebenverwandt {
+    var isMajor = (intervals[0] == 4);
+    ^isMajor.if(
+      { Chromatic(root + 3, intervals, octave) },     // Major: up minor third
+      { Chromatic(root - 3, intervals, octave) }      // Minor: down minor third
+    );
+  }
+
+  // Hexatonic pole (H): maximally distant in neo-Riemannian space
+  // C major (C-E-G) -> Ab minor (Ab-B-Eb)
+  hexatonicPole {
+    var isMajor = (intervals[0] == 4);
+    ^isMajor.if(
+      { Chromatic(root + 8, [3, 4], octave) },    // Major to minor tritone away
+      { Chromatic(root + 8, [4, 3], octave) }     // Minor to major tritone away
+    );
+  }
+
+  // Apply a sequence of neo-Riemannian operations
+  // ops: string of operations, e.g. "PLR" or "RLRL"
+  neoRiemannian { |ops|
+    var chord = this;
+    ops.do { |op|
+      chord = switch(op,
+        $P, { chord.parallel },
+        $L, { chord.leadingTone },
+        $R, { chord.relative },
+        $S, { chord.slide },
+        $N, { chord.nebenverwandt },
+        $H, { chord.hexatonicPole },
+        { chord } // default: no change
+      );
+    };
+    ^chord;
+  }
 }
 
