@@ -1,14 +1,13 @@
 // Encapsulates a sequence of chords and provides methods for manipulation and pattern generation
 Progression {
-  var <>chords, <>durations;
+  var <>chords;
 
-  *new { |chords, durations = nil|
-    ^super.new.init(chords, durations);
+  *new { |chords|
+    ^super.new.init(chords);
   }
 
-  init { |inChords, inDurations|
+  init { |inChords|
     chords = inChords;
-    durations = inDurations ?? Array.fill(chords.size, 1); // default to 1 beat per chord
   }
 
   // Returns the number of chords in the progression
@@ -34,51 +33,45 @@ Progression {
     var newChords = chords.collect({ |chord|
       chord.class.new(chord.root + semitones, chord.intervals, chord.octave, chord.inversion);
     });
-    ^Progression(newChords, durations);
+    ^Progression(newChords);
   }
 
   // Transposes all chords by octaves
   octave { |steps|
     var newChords = chords.collect(_.oct(steps));
-    ^Progression(newChords, durations);
+    ^Progression(newChords);
   }
 
   // Inverts all chords by the given number of inversions
   invert { |steps|
     var newChords = chords.collect(_.invert(steps));
-    ^Progression(newChords, durations);
+    ^Progression(newChords);
   }
 
   // Reverses the progression
   reverse {
-    ^Progression(chords.reverse, durations.reverse);
+    ^Progression(chords.reverse);
   }
 
   // Concatenates two progressions
   ++ { |other|
-    ^Progression(chords ++ other.chords, durations ++ other.durations);
+    ^Progression(chords ++ other.chords);
   }
 
   // Returns a subsequence of the progression
   copyRange { |start, end|
-    ^Progression(
-      chords.copyRange(start, end),
-      durations.copyRange(start, end)
-    );
+    ^Progression(chords.copyRange(start, end));
   }
 
   // Cycles through the progression n times
   cycle { |n = 2|
-    ^Progression(
-      chords.stutter(n).flatten,
-      durations.stutter(n).flatten
-    );
+    ^Progression(chords.stutter(n).flatten);
   }
 
   // Maps a function over each chord
   collect { |func|
     var newChords = chords.collect(func);
-    ^Progression(newChords, durations);
+    ^Progression(newChords);
   }
 
   // Common progressions as class methods
@@ -132,56 +125,110 @@ Progression {
 
   // Pattern generation methods
 
-  // Generates an arpeggiated pattern from the progression
-  arpeggio { |pattern = nil, notesPer = 4|
-    var result = [];
-    pattern = pattern ?? (0..notesPer-1); // default ascending pattern
-
-    chords.do { |chord, i|
-      var notes = chord.notes;
-      var dur = durations[i] / pattern.size;
-
-      pattern.do { |index|
-        var note = notes.wrapAt(index);
-        result = result.add([note, dur]);
-      };
-    };
-
-    ^result; // returns [note, duration] pairs
+  // Returns a Stream of chords for Pattern integration
+  asStream {
+    ^Pseq(chords, inf).asStream;
   }
 
-  // Generates a strummed pattern
-  strum { |delay = 0.01, direction = \up|
-    var result = [];
-
-    chords.do { |chord, i|
-      var notes = chord.notes;
-      var freqs = chord.freqs;
-      var lags = Array.fill(notes.size, { |j| delay * j });
-
-      if (direction == \down) { 
-        notes = notes.reverse;
-        freqs = freqs.reverse;
-      };
-
-      result = result.add([
-        freqs,          // all frequencies for this chord
-        lags,           // strum delays for each note
-        durations[i]    // duration for this chord
-      ]);
-    };
-
-    ^result; // returns [frequencies, lags, duration] triplets for each chord
-  }
-
-  // Returns a Pbind-ready event pattern
-  asPattern { |instrument = \default, amp = 0.5|
+  // Create a simple chord pattern
+  chordPattern { |rhythm = nil, instrument = \default|
+    var rhythmPattern = rhythm ?? RhythmPattern.straight(chords.size);
     ^Pbind(
       \instrument, instrument,
-      \freq, Pseq(this.freqs),
-      \dur, Pseq(durations.collect(_.dup(chords[0].size)).flatten),
-      \amp, amp
+      \chord, Pseq(chords),
+      \freq, Pfunc({ |ev| ev[\chord].freqs }),
+      \dur, Pseq(rhythmPattern.scaledDurations),
+      \amp, Pseq(rhythmPattern.velocities),
+      \legato, Pseq(rhythmPattern.gates)
     );
+  }
+
+  // Create an arpeggiated pattern
+  arpeggioPattern { |arpPattern = nil, rhythm = nil, instrument = \default|
+    var arp = arpPattern ?? ArpeggioPattern.up(4);
+    var events = arp.applyToProgression(this, rhythm);
+    ^Pbind(
+      \instrument, instrument,
+      \freq, Pseq(events.collect(_.freq)),
+      \amp, Pseq(events.collect(_.amp)),
+      \dur, Pseq(events.collect(_.dur)),
+      \sustain, Pseq(events.collect(_.sustain))
+    );
+  }
+
+  // Create a strummed pattern
+  strumPattern { |strumPattern = nil, rhythm = nil, instrument = \default|
+    var strum = strumPattern ?? StrumPattern.guitar(\medium);
+    var events = strum.applyToProgression(this, rhythm);
+    ^Pbind(
+      \instrument, instrument,
+      \freq, Pseq(events.collect(_.freq)),
+      \lag, Pseq(events.collect(_.lag)),
+      \amp, Pseq(events.collect(_.amp)),
+      \dur, Pseq(events.collect(_.dur)),
+      \sustain, Pseq(events.collect(_.sustain))
+    );
+  }
+
+  // Utility methods for working with patterns
+
+  // Apply a function to each chord's frequencies
+  mapFreqs { |func|
+    ^chords.collect({ |chord| func.value(chord.freqs) });
+  }
+
+  // Get all root frequencies
+  roots {
+    ^chords.collect({ |chord| chord.freqs[0] });
+  }
+
+  // Get bass line (lowest note of each chord)
+  bassLine {
+    ^chords.collect({ |chord| chord.freqs.minItem });
+  }
+
+  // Get top voice (highest note of each chord)
+  topVoice {
+    ^chords.collect({ |chord| chord.freqs.maxItem });
+  }
+
+  // Create a voice-led pattern (minimizes movement between chords)
+  voiceLeadPattern { |rhythm = nil, instrument = \default|
+    var rhythmPattern = rhythm ?? RhythmPattern.straight(chords.size);
+    var voicedChords = this.voiceLead;
+    
+    ^Pbind(
+      \instrument, instrument,
+      \freq, Pseq(voicedChords),
+      \dur, Pseq(rhythmPattern.scaledDurations.collect(_.dup(chords[0].size)).flatten),
+      \amp, Pseq(rhythmPattern.velocities.collect(_.dup(chords[0].size)).flatten),
+      \legato, Pseq(rhythmPattern.gates.collect(_.dup(chords[0].size)).flatten)
+    );
+  }
+
+  // Simple voice leading algorithm
+  voiceLead {
+    var result = [chords[0].freqs];
+    
+    (1..chords.size-1).do { |i|
+      var prevFreqs = result[i-1];
+      var currentFreqs = chords[i].freqs;
+      var voicedFreqs = Array.new(currentFreqs.size);
+      
+      // For each voice in the previous chord, find the closest note in the current chord
+      prevFreqs.do { |prevFreq|
+        var distances = currentFreqs.collect({ |freq| (freq - prevFreq).abs });
+        var closestIndex = distances.minIndex;
+        voicedFreqs = voicedFreqs.add(currentFreqs[closestIndex]);
+        currentFreqs = currentFreqs.reject({ |freq, j| j == closestIndex });
+      };
+      
+      // Add any remaining notes
+      voicedFreqs = voicedFreqs ++ currentFreqs;
+      result = result.add(voicedFreqs);
+    };
+    
+    ^result;
   }
 }
 

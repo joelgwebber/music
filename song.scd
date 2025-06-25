@@ -47,6 +47,10 @@ all {:ch.names, ch <- prog};
 )
 p.stop;
 
+(
+var prog = Progression.ii_V_I(3, \major);
+p = prog.asPattern(\cfstring1).play;
+)
 
 // Canon in D
 // D - A - Bm - F#m - G - D - G - A
