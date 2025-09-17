@@ -3,10 +3,6 @@ Server.local.boot;
 "lib/instruments.scd".load;
 )
 
-x = Synth(\smooth, [\freq, 220, \amp, 0.1]);
-x.free;
-s.queryAllNodes;
-
 (
   // streams as a sequence of pitches
   var pattern, streams, dur, durDiff;
