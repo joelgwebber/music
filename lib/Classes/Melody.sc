@@ -12,5 +12,11 @@ Melody : Notes {
   ++ { |other|
     ^Melody(notes ++ other.notes, tuning);
   }
+
+  // Transposes all notes by octaves
+  octave { |steps|
+    var transposedNotes = notes + (tuning.size * steps);
+    ^Melody(transposedNotes, tuning);
+  }
 }
 
