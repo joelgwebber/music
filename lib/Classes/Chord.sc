@@ -1,32 +1,19 @@
-// Represents any group of notes, in any tuning, related by intervals.
+// Represents a group of notes related by intervals.
 //
 // TODO:
-// - Parameterize root frequency.
 // - Modulo inversion to chord size.
-Chord {
-  var <>root, <>intervals, <>octave, <>inversion, <tuning;
-
-  // Returns the pitch class for a given pitch.
-  *pitchClass{ |pitch, numClasses|
-    var sign = pitch.sign;
-    pitch = pitch.abs.mod(numClasses);
-    ^case
-      {pitch == 0} {0}
-      {sign > 0}   {pitch}
-      {sign < 0}   {12-pitch}
-    ;
-  }
+Chord : Notes {
+  var <>root, <>intervals, <>octave, <>inversion;
 
   *new { |root, intervals, octave = 0, inversion = 0, tuning = (Tuning.at(\et12))|
-    ^super.new.init(root, intervals, octave, inversion, tuning);
+    ^super.new(tuning).initChord(root, intervals, octave, inversion);
   }
 
-  init { |inRoot, inIntervals, inOctave, inVersion, inTuning|
+  initChord { |inRoot, inIntervals, inOctave, inVersion|
     root = inRoot;
     intervals = inIntervals;
     octave = inOctave;
     inversion = inVersion;
-    tuning = inTuning;
   }
 
   size { ^intervals.size + 1 }
@@ -65,16 +52,6 @@ Chord {
     ^inverted;
   }
 
-  // Returns an ordered array of frequencies in this chord, taking octave and
-  //   inversion into account.
-  freqs {
-    var notes = this.notes();
-    var mod = tuning.size;
-    var pcs = all {:this.pitchClass(note), note <- notes};
-    var octs = 440 * (2 ** floor(notes / mod));
-    ^all {:round(tuning.ratios[pcs[i]] * octs[i]), i <- (0..notes.size-1)};
-  }
-
   // Returns an array of pitches in this chord, ignoring octave and inversion.
   // These differ from pitch-classes in that they can extend beyond the strict
   //   definition of 'class', to preserve interval order.
@@ -88,15 +65,31 @@ Chord {
     ^pitches;
   }
 
-  // Returns the pitch class for a given note.
-  pitchClass{ |note|
-    var sign = note.sign;
-    note = note.abs.mod(tuning.size);
-    ^case
-      {note == 0} {0}
-      {sign > 0}  {note}
-      {sign < 0}  {12-note}
-    ;
+  // Returns a Melody with the chord arpeggiated
+  // Examples:
+  //   chord.arp             // ascending (default)
+  //   chord.arp(\up)        // ascending: [0, 1, 2]
+  //   chord.arp(\down)      // descending: [2, 1, 0]
+  //   chord.arp(\upDown)    // up then down: [0, 1, 2, 1]
+  //   chord.arp(\downUp)    // down then up: [2, 1, 0, 1]
+  //   chord.arp(\random)    // random order
+  //   chord.arp([0, 2, 1])  // custom pattern (wraps if needed)
+  arp { |pattern = \up|
+    var indices = case
+      { pattern.isArray } { pattern }
+      { pattern == \up } { (0..this.size-1) }
+      { pattern == \down } { (this.size-1..0) }
+      { pattern == \upDown } { (0..this.size-1) ++ (this.size-2..1) }
+      { pattern == \downUp } { (this.size-1..0) ++ (1..this.size-2) }
+      { pattern == \random } { (0..this.size-1).scramble }
+      { (0..this.size-1) };  // Default to ascending
+
+    // Use wrapAt for overflow handling
+    var arpNotes = indices.collect { |idx|
+      this.notes.wrapAt(idx)
+    };
+
+    ^Melody(arpNotes, this.tuning);
   }
 
   // Octave transform:

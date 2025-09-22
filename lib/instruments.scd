@@ -2,17 +2,17 @@
 "./lib/drums.scd".load;
 
 SynthDef(\who, {|amp=0.1, freq=440, detune=0, gate=1, out=0, ffreq=800|
-	var env = EnvGen.kr(
-		Env.asr(0.01, amp, 0.5), gate,
-		doneAction: Done.freeSelf
-	);
+  var env = EnvGen.kr(
+    Env.asr(0.01, amp, 0.5), gate,
+    doneAction: Done.freeSelf
+  );
   Out.ar(out, Formant.ar(freq + detune, ffreq, 120, env));
 }).add;
 
 SynthDef(\singrain, {|out=0, freq=440, sustain=0.05, pan=0.5|
   var env = EnvGen.kr(
     Env.perc(0.01, sustain, 0.3),
-		doneAction: Done.freeSelf
+    doneAction: Done.freeSelf
   );
   Out.ar(out, Pan2.ar(
     SinOsc.ar(freq, 0, env),

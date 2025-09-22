@@ -19,7 +19,7 @@ var g7 = gM.extend(1);
 var prog = Progression([cm, gm, cm, gm, ebmaj7, fM, gsus4, gM, g7]);
 
 // Play it using the built-in pattern method
-p = prog.asPattern(\cfstring1, 0.5).play;
+p = prog.chordPattern(nil, \cfstring1).play;
 
 // Show the chord names
 prog.names.postln;
@@ -45,9 +45,9 @@ var cMajor = Chromatic(3, [4, 3], 0); // C major
 // Example 3: Creating a neo-Riemannian progression
 (
 var cMajor = Chromatic(3, [4, 3], 0);
-var prog = Progression.neoRiemannian(cMajor, "PLRPLR");
+var prog = Prog.neoRiemannian(cMajor, "PLRPLR");
 
-p = prog.asPattern(\cfstring1, 0.4).play;
+p = prog(nil, \cfstring1).play;
 prog.names.postln;
 )
 p.stop;
@@ -64,14 +64,14 @@ var prog1 = Progression.ii_V_I(3, \major);
 var prog2 = Progression.circleOfFifths(3, 8, \dominant7);
 "Circle of fifths: ".post; prog2.names.postln;
 
-p = prog2.asPattern(\cfstring1, 0.3).play;
+p = prog2.chordPattern(nil, \cfstring1).play;
 )
 p.stop;
 
 // Example 5: Arpeggio patterns
 (
 var prog = Progression.ii_V_I(3, \major);
-var arpeggioData = prog.strum([0, 2, 1, 3], \up); // Custom arpeggio pattern
+var arpeggioData = prog.arpeggioPattern(nil, [0, 2, 1, 3], \up); // Custom arpeggio pattern
 
 // Convert to events for Pbind
 var notes = arpeggioData.collect(_[0]);
@@ -129,7 +129,7 @@ var prog2 = Progression.circleOfFifths(bridge.chords.last.root, 4, \major);
 
 var combined = prog1 ++ bridge ++ prog2;
 
-p = combined.asPattern(\cfstring1, 0.4).play;
+p = combined.chordPattern(nil, \cfstring1).play;
 "Combined progression: ".postln;
 combined.names.do { |names| names.postln };
 )

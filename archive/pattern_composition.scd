@@ -8,8 +8,7 @@ Server.local.boot;
 
 // Approach 1: Pattern Stack - Transform patterns through a chain of modifiers
 // Each modifier takes a pattern and returns a modified pattern
-~patternStack = {
-	arg basePattern, modifiers;
+~patternStack = { |basePattern, modifiers|
 	modifiers.inject(basePattern, { |pat, mod| mod.value(pat) });
 };
 
@@ -288,4 +287,4 @@ Server.local.boot;
 };
 )
 
-// ~complexExample.value;
+~complexExample.value;
