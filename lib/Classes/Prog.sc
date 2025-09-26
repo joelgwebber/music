@@ -57,6 +57,27 @@ Prog : Pattern {
     ^super.new.init(chords);
   }
 
+  // Create a progression from Roman numerals in a given key
+  // Examples:
+  //   Prog.inKey(\C, [\I, \vi, \IV, \V])     // C Am F G
+  //   Prog.inKey(\G, [\I, \vi, \ii, \V])     // G Em Am D
+  //   Prog.inKey(\Am, [\i, \iv, \i, \V])     // Am Dm Am E
+  //   Prog.inKey(\C, [\I, \V_E, \I])         // C G/E C (with inversion)
+  //   Prog.inKey(\C, [\Imaj7, \vi7, \V7])    // Cmaj7 Am7 G7
+  *inKey { |key = \C, numerals, octave = 0|
+    var keyRoot, mode, chords;
+
+    // Parse key using Notation helper
+    #keyRoot, mode = Notation.parseKey(key);
+
+    // Build chords from Roman numerals
+    chords = numerals.collect { |numeral|
+      Notation.romanToChord(keyRoot, mode, numeral, octave);
+    };
+
+    ^Prog(chords);
+  }
+
   init { |inChords|
     chords = inChords;
     tuning = inChords[0].tuning;

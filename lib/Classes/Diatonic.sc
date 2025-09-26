@@ -1,8 +1,6 @@
 // TODO: doc
 // - Handle 2nd/6th interval transforms
 //
-// -C-
-//
 // -B♮
 //    \                                                
 // ----D♮----A♮----E♮----B♮                              
@@ -12,8 +10,6 @@
 //            tonic            F♮----C♮----G♮----D♮----
 //                                   ^             \
 //                                 tonic            F♮-
-//
-// -D-
 //
 // -C#
 //    \

@@ -40,6 +40,28 @@ Chromatic : Chord {
     ^super.new(chord.root, chord.intervals, chord.octave, chord.inversion, tuning);
   }
 
+  // Create a chord from a symbol in a given key
+  // Examples:
+  //   Chromatic.inKey(\C, \I)      // C major
+  //   Chromatic.inKey(\C, \vi)     // A minor
+  //   Chromatic.inKey(\G, \V7)     // D7
+  //   Chromatic.inKey(\Am, \iv)    // D minor
+  *inKey { |key = \C, numeral, octave = 0|
+    var keyRoot, mode;
+    #keyRoot, mode = Notation.parseKey(key);
+    ^Notation.romanToChord(keyRoot, mode, numeral, octave);
+  }
+
+  // Create a chord from standard chord symbol notation
+  // Examples:
+  //   Chromatic.fromSymbol(\Cmaj7)   // C major 7
+  //   Chromatic.fromSymbol(\Dm7)     // D minor 7
+  //   Chromatic.fromSymbol(\G7)      // G dominant 7
+  //   Chromatic.fromSymbol(\Eb9)    // Eb dominant 9
+  *fromSymbol { |symbol, octave = 0|
+    ^Notation.symbolToChord(symbol, octave);
+  }
+
   // Returns an array of this chord's note names.
   // For chromatic chords, it will always use sharps rather than flats.
   names { ^all {:this.noteName(note), note <- this.notes} }
