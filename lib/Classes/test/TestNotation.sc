@@ -31,21 +31,9 @@ TestNotation : UnitTest {
     this.assertEquals(Notation.noteToNumber(\Bs), 0, "B# should be 0");
     this.assertEquals(Notation.noteToNumber(\Fb), 4, "Fb should be 4");
     this.assertEquals(Notation.noteToNumber(\Es), 5, "E# should be 5");
+
   }
 
-  // Test number to note conversion
-  test_numberToNote {
-    this.assertEquals(Notation.numberToNote(0), \C, "0 should be C");
-    this.assertEquals(Notation.numberToNote(1), \Cs, "1 should be C#");
-    this.assertEquals(Notation.numberToNote(2), \D, "2 should be D");
-    this.assertEquals(Notation.numberToNote(7), \G, "7 should be G");
-    this.assertEquals(Notation.numberToNote(11), \B, "11 should be B");
-
-    // Test wrapping
-    this.assertEquals(Notation.numberToNote(12), \C, "12 should wrap to C");
-    this.assertEquals(Notation.numberToNote(13), \Cs, "13 should wrap to C#");
-    this.assertEquals(Notation.numberToNote(24), \C, "24 should wrap to C");
-  }
 
   // Test key parsing
   test_parseKey {

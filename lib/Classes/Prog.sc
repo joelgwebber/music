@@ -2,36 +2,49 @@
 Prog : Pattern {
   var <chords, <tuning;
 
-  // Common progressions as class methods
+  *initClass {
+    Class.initClassTree(Notation);
+  }
+
+  // Creates a ii-V-I progression in the given key.
+  // key: Root key (number 0-11 or note symbol).
+  // mode: Key mode (\major or \minor).
+  // Returns: Prog with ii-V-I chords.
   *ii_V_I { |key = 0, mode = \major|
     var root, second, fifth;
     var chords;
+    var keyNum = Notation.noteToNumber(key);
 
     // TODO: Diatonic?
     if (mode == \major) {
-      root = Chromatic(key, [4, 3], 0);         // I (major)
-      second = Chromatic(key + 2, [3, 4], 0);   // ii (minor)
-      fifth = Chromatic(key + 7, [4, 3], 0);    // V (major)
+      root = Chord(keyNum, [4, 3], 0);         // I (major)
+      second = Chord(keyNum + 2, [3, 4], 0);   // ii (minor)
+      fifth = Chord(keyNum + 7, [4, 3], 0);    // V (major)
     } {
-      root = Chromatic(key, [3, 4], 0);         // i (minor)
-      second = Chromatic(key + 2, [3, 3], 0);   // ii° (diminished)
-      fifth = Chromatic(key + 7, [3, 4], 0);    // v (minor)
+      root = Chord(keyNum, [3, 4], 0);         // i (minor)
+      second = Chord(keyNum + 2, [3, 3], 0);   // ii° (diminished)
+      fifth = Chord(keyNum + 7, [3, 4], 0);    // v (minor)
     };
 
     chords = [second, fifth, root];
     ^Prog(chords);
   }
 
+  // Creates a circle of fifths progression.
+  // start: Starting note (number 0-11 or note symbol).
+  // length: Number of chords to generate.
+  // quality: Chord quality (\major, \minor, or \dominant7).
+  // Returns: Prog following the circle of fifths.
   *circleOfFifths { |start = 0, length = 8, quality = \dominant7|
     var chords = [];
-    var current = start;
+    var current = Notation.noteToNumber(start);
 
     // TODO: Diatonic?
     length.do {
       var chord = case
-        { quality == \major } { Chromatic(current, [4, 3], 0) }
-        { quality == \minor } { Chromatic(current, [3, 4], 0) }
-        { quality == \dominant7 } { Chromatic(current, [4, 3, 3], 0) };
+        { quality == \major } { Chord(current, [4, 3], 0) }
+        { quality == \minor } { Chord(current, [3, 4], 0) }
+        { quality == \dominant7 } { Chord(current, [4, 3, 3], 0) };
 
       chords = chords.add(chord);
       current = (current + 7) % 12; // move up a fifth
@@ -40,7 +53,10 @@ Prog : Pattern {
     ^Prog(chords);
   }
 
-  // Create a neo-Riemannian progression from a starting chord and operations
+  // Creates a neo-Riemannian progression from a starting chord and operations.
+  // startChord: Initial Chord.
+  // operations: Array of operation symbols (\P, \L, \R, \S, \N, \H) or strings.
+  // Returns: Prog with neo-Riemannian transformations applied.
   *neoRiemannian { |startChord, operations|
     var chords = [startChord];
     var currentChord = startChord;
@@ -53,6 +69,9 @@ Prog : Pattern {
     ^Prog(chords);
   }
 
+  // Creates a new Prog from an array of Chords.
+  // chords: Array of Chord instances.
+  // Returns: New Prog instance.
   *new { |chords|
     ^super.new.init(chords);
   }
@@ -90,19 +109,25 @@ Prog : Pattern {
     })
   }
 
-  // Returns the number of chords in the progression
+  // Gets the number of chords in the progression.
+  // Returns: Integer count of chords.
   size { ^chords.size }
 
-  // Returns all note names for the progression
+  // Gets all note names for each chord in the progression.
+  // Returns: Array of arrays of note name symbols.
   names { ^chords.collect(_.names) }
 
-  // Returns all notes for the progression as a flat array
+  // Gets all note numbers for each chord in the progression.
+  // Returns: Array of arrays of chromatic note numbers.
   notes { ^chords.collect(_.notes) }
 
-  // Returns frequencies grouped by chord
+  // Gets frequencies for each chord in the progression.
+  // Returns: Array of arrays of frequencies in Hz.
   freqs { ^chords.collect(_.freqs) }
 
-  // Pattern implementation - yields chord frequencies
+  // Pattern implementation that yields chord frequencies.
+  // inval: Event being processed.
+  // Returns: Modified event stream.
   embedInStream { |inval|
     var chordFreqs = this.freqs;
     inf.do { |i|
@@ -156,22 +181,27 @@ Prog : Pattern {
     ^Melody(arpNotes, this.tuning);
   }
 
-  // Get Melody of chord roots
+  // Extracts a melody from the root notes of each chord.
+  // Returns: Melody of root notes.
   roots {
     ^Melody(chords.collect({ |chord| chord.notes[0] }), this.tuning);
   }
 
-  // Get bass line Melody (lowest note of each chord)
+  // Extracts a melody from the bass (lowest) notes of each chord.
+  // Returns: Melody of bass notes.
   bassLine {
     ^Melody(chords.collect({ |chord| chord.notes.minItem }), this.tuning);
   }
 
-  // Get top voice Melody (highest note of each chord)
+  // Extracts a melody from the top (highest) notes of each chord.
+  // Returns: Melody of top notes.
   topVoice {
     ^Melody(chords.collect({ |chord| chord.notes.maxItem }), this.tuning);
   }
 
-  // Transposes all chords by the given number of semitones
+  // Transposes all chords by semitones.
+  // semitones: Number of semitones to transpose (positive = up, negative = down).
+  // Returns: New transposed Prog.
   transpose { |semitones|
     var newChords = chords.collect({ |chord|
       chord.class.new(chord.root + semitones, chord.intervals, chord.octave, chord.inversion);
@@ -179,24 +209,31 @@ Prog : Pattern {
     ^Prog(newChords);
   }
 
-  // Transposes all chords by octaves
+  // Transposes all chords by octaves.
+  // steps: Number of octaves to transpose (positive = up, negative = down).
+  // Returns: New transposed Prog.
   octave { |steps|
     var newChords = chords.collect(_.oct(steps));
     ^Prog(newChords);
   }
 
-  // Inverts all chords by the given number of inversions
+  // Inverts all chords in the progression.
+  // steps: Number of inversions to apply to each chord.
+  // Returns: New Prog with inverted chords.
   invert { |steps|
     var newChords = chords.collect(_.invert(steps));
     ^Prog(newChords);
   }
 
-  // Reverses the progression
+  // Reverses the order of chords in the progression.
+  // Returns: New Prog with reversed chord order.
   reverse {
     ^Prog(chords.reverse);
   }
 
-  // Concatenates two progressions
+  // Concatenates this progression with another.
+  // other: Another Prog to append.
+  // Returns: New combined Prog.
   ++ { |other|
     ^Prog(chords ++ other.chords);
   }

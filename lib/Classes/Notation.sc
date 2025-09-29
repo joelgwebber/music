@@ -5,16 +5,52 @@ Notation {
 
   *initClass {
     // Map note symbols to chromatic numbers
-    noteMap = (
-      \C: 0, \D: 2, \E: 4, \F: 5, \G: 7, \A: 9, \B: 11,
-      \Cb: 11, \Db: 1, \Eb: 3, \Fb: 4, \Gb: 6, \Ab: 8, \Bb: 10,
-      \Cs: 1, \Ds: 3, \Es: 5, \Fs: 6, \Gs: 8, \As: 10, \Bs: 0,
-      // Also support sharp notation
-      \Csharp: 1, \Dsharp: 3, \Esharp: 5, \Fsharp: 6,
-      \Gsharp: 8, \Asharp: 10, \Bsharp: 0,
-      \Cflat: 11, \Dflat: 1, \Eflat: 3, \Fflat: 4,
-      \Gflat: 6, \Aflat: 8, \Bflat: 10
-    );
+    noteMap = IdentityDictionary.newFrom([
+      // Natural notes
+      \C, 0,
+      \D, 2,
+      \E, 4,
+      \F, 5,
+      \G, 7,
+      \A, 9,
+      \B, 11,
+
+      // Flat notes
+      \Cb, 11,
+      \Db, 1,
+      \Eb, 3,
+      \Fb, 4,
+      \Gb, 6,
+      \Ab, 8,
+      \Bb, 10,
+
+      // Sharp notes with 's' notation
+      \Cs, 1,
+      \Ds, 3,
+      \Es, 5,
+      \Fs, 6,
+      \Gs, 8,
+      \As, 10,
+      \Bs, 0,
+
+      // Long sharp notation
+      \Csharp, 1,
+      \Dsharp, 3,
+      \Esharp, 5,
+      \Fsharp, 6,
+      \Gsharp, 8,
+      \Asharp, 10,
+      \Bsharp, 0,
+
+      // Long flat notation
+      \Cflat, 11,
+      \Dflat, 1,
+      \Eflat, 3,
+      \Fflat, 4,
+      \Gflat, 6,
+      \Aflat, 8,
+      \Bflat, 10
+    ]);
 
     // Map Roman numerals to scale degrees
     romanMap = (
@@ -23,18 +59,28 @@ Notation {
     );
   }
 
-  // Convert a note symbol to chromatic pitch class (0-11)
+  // Converts a note symbol to chromatic pitch class (0-11).
+  // note: Note symbol (e.g., \C, \Fs, \Bb) or number.
+  // Returns: Chromatic pitch class 0-11, or original if already a number.
   *noteToNumber { |note|
-    ^noteMap[note] ? 0;
+    if (note.isNumber) {
+      ^note;
+    } {
+      ^noteMap[note] ? 0;
+    };
   }
 
-  // Convert chromatic number to note name (using sharps)
+  // Converts a chromatic number to note name symbol (using sharps).
+  // num: Chromatic pitch number.
+  // Returns: Note symbol with sharp notation if needed.
   *numberToNote { |num|
-    var names = [\C, \Cs, \D, \Ds, \E, \F, \Fs, \G, \Gs, \A, \As, \B];
+    var names = [\C, \C♯, \D, \D♯, \E, \F, \F♯, \G, \G♯, \A, \A♯, \B];
     ^names[num % 12];
   }
 
-  // Parse a key symbol (e.g., \C, \Am, \Gm) into root and mode
+  // Parses a key symbol into root pitch and mode.
+  // key: Key symbol (e.g., \C for C major, \Am for A minor).
+  // Returns: Array of [root pitch (0-11), mode symbol (\major or \minor)].
   *parseKey { |key|
     var keyStr = key.asString;
     var root, mode;
@@ -52,7 +98,9 @@ Notation {
     ^[this.noteToNumber(root), mode];
   }
 
-  // Parse a Roman numeral into degree, quality, and modifiers
+  // Parses a Roman numeral into its components.
+  // numeral: Roman numeral symbol (e.g., \I, \vi, \V7, \bVII).
+  // Returns: Event with degree, quality, alteration, chordType, and bassNote.
   *parseRomanNumeral { |numeral|
     var str = numeral.asString;
     var degree, quality, alteration = 0, bassNote, chordType;
@@ -88,7 +136,9 @@ Notation {
     );
   }
 
-  // Find the Roman numeral degree (1-7)
+  // Finds the scale degree from a Roman numeral string.
+  // str: String containing Roman numeral.
+  // Returns: Scale degree 1-7.
   *findRomanDegree { |str|
     // Check longer numerals first to avoid false matches
     [\VII, \III, \II, \VI, \IV, \I, \V,
@@ -100,7 +150,9 @@ Notation {
     ^1;  // Default to I
   }
 
-  // Determine chord quality from Roman numeral case
+  // Determines chord quality from Roman numeral case.
+  // str: String containing Roman numeral.
+  // Returns: Symbol 'major' or 'minor' based on case.
   *determineQuality { |str|
     // Check the first Roman character for case
     [\I, \V, \X].do { |char|
@@ -109,7 +161,9 @@ Notation {
     ^'minor';  // Lowercase means minor
   }
 
-  // Parse chord extensions and types
+  // Parses chord extensions and types from a string.
+  // str: String containing chord type indicators.
+  // Returns: Symbol for chord type (e.g., \triad, \dom7, \maj7, \sus4).
   *parseChordType { |str|
     case
       { str.contains("maj9") } { ^\maj9 }
@@ -127,7 +181,9 @@ Notation {
       { true } { ^\triad };
   }
 
-  // Get scale degrees for a given mode
+  // Gets scale degree intervals for a given mode.
+  // mode: Mode symbol (\major or \minor).
+  // Returns: Array of semitone offsets from root for each scale degree.
   *scaleDegrees { |mode = \major|
     ^if (mode == \major) {
       [0, 2, 4, 5, 7, 9, 11]  // Major scale intervals
@@ -136,7 +192,12 @@ Notation {
     };
   }
 
-  // Get intervals for a chord based on quality and type
+  // Gets interval structure for a chord based on its properties.
+  // quality: Chord quality ('major' or 'minor').
+  // chordType: Type symbol (\triad, \dom7, \maj7, etc.).
+  // degree: Scale degree (1-7) for diatonic context.
+  // mode: Key mode (\major or \minor) for diatonic context.
+  // Returns: Array of semitone intervals between chord tones.
   *chordIntervals { |quality = 'major', chordType = \triad, degree = 1, mode = \major|
     // Handle special diatonic cases
     if ((mode == \major) && (degree == 7)) {
@@ -181,7 +242,12 @@ Notation {
       { [4, 3] };
   }
 
-  // Build a chord from a Roman numeral in a given key
+  // Builds a Chord from a Roman numeral in a given key.
+  // keyRoot: Root pitch of the key (0-11).
+  // mode: Key mode (\major or \minor).
+  // romanNumeral: Roman numeral symbol.
+  // octave: Base octave for the chord.
+  // Returns: Chord corresponding to the Roman numeral in the key.
   *romanToChord { |keyRoot, mode, romanNumeral, octave = 0|
     var parsed = this.parseRomanNumeral(romanNumeral);
     var scaleDegrees = this.scaleDegrees(mode);
@@ -199,7 +265,7 @@ Notation {
     );
 
     // Create the chord
-    chord = Chromatic(chordRoot, intervals, octave);
+    chord = Chord(chordRoot, intervals, octave);
 
     // TODO: Handle inversions based on bassNote
     if (parsed.bassNote.notNil) {
@@ -209,35 +275,39 @@ Notation {
     ^chord;
   }
 
-  // Parse a chord symbol (e.g., Cmaj7, Dm7, G7) into a Chromatic chord
+  // Parses a chord symbol into a Chord object.
+  // symbol: Chord symbol (e.g., \Cmaj7, \Dm7, \G7, \Fsus4).
+  // octave: Base octave for the chord.
+  // Returns: Chord matching the symbol.
   *symbolToChord { |symbol, octave = 0|
     var str = symbol.asString;
     var root, quality, chordType, intervals;
     var rootStr, qualStr;
 
     // Extract root note (first 1-2 chars)
-    // Check for sharp (#) or flat (b) but not 's' which could be 'sus'
-    if ((str.size > 1) && ((str[1] == $b) || (str[1] == $#))) {
-      rootStr = str[0..1];
-      qualStr = str[2..];
-    } {
-      // Check if it's a sharp note with 's' notation (e.g., Cs, Fs)
-      // Only if 's' is NOT followed by 'us' (which would be 'sus')
-      if ((str.size > 1) && (str[1] == $s)) {
-        // Check if it's 'sus' or just 's' for sharp
-        if ((str.size > 2) && (str[2] == $u)) {
-          // It's 'sus', not sharp
-          rootStr = str[0..0];
-          qualStr = str[1..];
-        } {
-          // It's sharp (Cs, Fs, etc.)
-          rootStr = str[0..1];
-          qualStr = if (str.size > 2) { str[2..] } { "" };
-        }
+    // Start with just first character
+    rootStr = str.keep(1);        // First character
+    qualStr = str.drop(1);        // Everything after first character
+
+    // Check if second character is an accidental
+    if (str.size > 1) {
+      if (str[1] == $#) {
+        // Sharp with #
+        rootStr = str.keep(2);
+        qualStr = str.drop(2);
       } {
-        rootStr = str[0..0];
-        qualStr = str[1..];
-      }
+        if (str[1] == $b) {
+          // Flat with b
+          rootStr = str.keep(2);
+          qualStr = str.drop(2);
+        } {
+          if ((str[1] == $s) && ((str.size < 3) || (str[2] != $u))) {
+            // Sharp with 's', but not 'sus'
+            rootStr = str.keep(2);
+            qualStr = str.drop(2);
+          };
+        };
+      };
     };
 
     root = this.noteToNumber(rootStr.asSymbol);
@@ -261,6 +331,6 @@ Notation {
     // Get intervals
     intervals = this.chordIntervals(quality, chordType);
 
-    ^Chromatic(root, intervals, octave);
+    ^Chord(root, intervals, octave);
   }
 }

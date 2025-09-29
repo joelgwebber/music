@@ -4,14 +4,14 @@ Server.local.boot;
 )
 
 ( // Chords to use throughout.
-~cm = Chromatic(3, [3, 4], -2);
-~gm = ~cm.thirds(2);
-~ebmaj7 = ~gm.extend(-1);
-~fM = ~cm.parallel.thirds(-2);
+~cm = Chord.minor(3, -2);
+~gm = ~cm.l.l;
+~ebmaj7 = Chord.maj7(3, -2);
+~fM = ~cm.p.r.r;
 
-~gsus4 = Chromatic(3, [7, 7], -1);
-~gM = ~gm.parallel();
-~g7 = ~gM.extend(1);
+~gsus4 = Chord.sus4(7, -1);
+~gM = ~gm.p;
+~g7 = ~gM.add7(\dom);
 
 ~prog = Prog([~cm, ~gm, ~cm, ~gm, ~ebmaj7, ~fM, ~gsus4, ~gM, ~g7]);
 )
