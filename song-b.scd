@@ -152,3 +152,15 @@ postln("Roman numeral progression: vi-IV-I-V in C");
 ~hat.stop;
 )
 
+
+(
+~hat = Pchain(
+	Rhythm.clave(\son),
+	Pbind(
+		\instrument, \eHat,
+		\sustain, 0.02
+	)
+).play;
+)
+
+~hat.stop;
