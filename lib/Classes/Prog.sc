@@ -15,7 +15,6 @@ Prog : Pattern {
     var chords;
     var keyNum = Notation.noteToNumber(key);
 
-    // TODO: Diatonic?
     if (mode == \major) {
       root = Chord(keyNum, [4, 3], 0);         // I (major)
       second = Chord(keyNum + 2, [3, 4], 0);   // ii (minor)
@@ -39,7 +38,6 @@ Prog : Pattern {
     var chords = [];
     var current = Notation.noteToNumber(start);
 
-    // TODO: Diatonic?
     length.do {
       var chord = case
         { quality == \major } { Chord(current, [4, 3], 0) }
@@ -78,11 +76,11 @@ Prog : Pattern {
 
   // Create a progression from Roman numerals in a given key
   // Examples:
-  //   Prog.inKey(\C, [\I, \vi, \IV, \V])     // C Am F G
-  //   Prog.inKey(\G, [\I, \vi, \ii, \V])     // G Em Am D
-  //   Prog.inKey(\Am, [\i, \iv, \i, \V])     // Am Dm Am E
-  //   Prog.inKey(\C, [\I, \V_E, \I])         // C G/E C (with inversion)
-  //   Prog.inKey(\C, [\Imaj7, \vi7, \V7])    // Cmaj7 Am7 G7
+  //   Prog.inKey(\C,  [\I, \vi, \IV, \V])     // C Am F G
+  //   Prog.inKey(\G,  [\I, \vi, \ii, \V])     // G Em Am D
+  //   Prog.inKey(\Am, [\i, \iv, \i, \V])      // Am Dm Am E
+  //   Prog.inKey(\C,  [\I, \V_E, \I])         // C G/E C (with inversion)
+  //   Prog.inKey(\C,  [\Imaj7, \vi7, \V7])    // Cmaj7 Am7 G7
   *inKey { |key = \C, numerals, octave = 0|
     var keyRoot, mode, chords;
 

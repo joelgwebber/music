@@ -22,7 +22,7 @@ Chord : Notes {
 
   *initClass {
     Class.initClassTree(Notation);
-    names = ['A', 'A♯', 'B', 'C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯'];
+    names = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
   }
 
   // Swaps major and minor thirds in an interval array (3 ↔ 4).
@@ -46,7 +46,7 @@ Chord : Notes {
   }
 
   initChord { |inRoot, inIntervals, inOctave, inInversion|
-    root = inRoot;
+    root = Notation.noteToNumber(inRoot);
     intervals = inIntervals;
     octave = inOctave;
     inversion = inInversion;

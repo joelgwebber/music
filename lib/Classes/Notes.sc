@@ -26,11 +26,39 @@ Notes : Pattern {
 
   size { ^this.notes.size }
 
+  // Converts a MIDI note number to scientific pitch notation (3-char fixed width).
+  // note: MIDI note number (0-127).
+  // Returns: String like "C♮4", "C#4", "D♭4" (3 characters).
+  noteToScientific { |note|
+    var pc = this.pitchClass(note);
+    var octave = (note / tuning.size).floor.asInteger;
+    var noteNames = ["C♮", "C#", "D♮", "D#", "E♮", "F♮", "F#", "G♮", "G#", "A♮", "A#", "B♮"];
+    ^noteNames[pc] ++ octave.asString;
+  }
+
+  // Gets scientific pitch notation for all notes.
+  // Returns: Array of 3-char strings.
+  scientific {
+    ^this.notes.collect({ |note| this.noteToScientific(note) });
+  }
+
   freqs {
+    // MIDI standard: note 69 (A4) = 440 Hz
+    // Formula: freq = 440 * 2^((midiNote - 69) / 12)
+    // For 12-TET tuning with ratios, we calculate octave frequency and apply ratio
     var mod = tuning.size;
     var pcs = all {:this.pitchClass(note), note <- this.notes};
-    var octs = 440 * (2 ** floor(this.notes / mod));
-    ^all {:round(tuning.ratios[pcs[i]] * octs[i]), i <- (0..this.notes.size-1)};
+
+    // Calculate frequency for each note using MIDI standard
+    // Base frequency for C in each octave, then apply tuning ratio for pitch class
+    var freqs = this.notes.collect({ |note|
+      var pc = this.pitchClass(note);
+      // A4 (MIDI 69) = 440 Hz, so C4 (MIDI 60) = 440 * 2^(-9/12)
+      // For any note: 440 * 2^((note - 69)/12)
+      440 * (2 ** ((note - 69) / 12));
+    });
+
+    ^freqs.collect(_.round);
   }
 
   // Derived classes must provide a .notes method

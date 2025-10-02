@@ -61,7 +61,6 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 ~g = Chord.major(7, -1);   // G major
 
 ~prog = Prog([~am, ~f, ~c, ~g]);
-postln("Chord progression created: Am - F - C - G");
 )
 
 // Alternative approaches with the new Chord API:
@@ -76,15 +75,12 @@ postln("Chord progression created: Am - F - C - G");
 // Approach 3: Direct construction with convenience methods
 ~am_direct = Chord.minor(\A, -1);
 ~f_direct = Chord.major(\F, -1);
-
-postln("Three ways to build chords - all valid depending on your compositional approach");
 )
 
 // Simplification using the new Roman numeral notation:
 (
 // Now we can use Roman numerals!
 ~prog_roman = Prog.inKey(\C, [\vi, \IV, \I, \V]);
-postln("Roman numeral progression: vi-IV-I-V in C");
 
 // Test it sounds the same as our manual version
 ~test_roman = Pchain(
@@ -118,15 +114,16 @@ postln("Roman numeral progression: vi-IV-I-V in C");
 (
 ~clock = TempoClock(120/60); // 120 BPM
 
+~prog = ~jazz_prog;
 ~chords = Pchain(
 	~prog,
-	Rhythm.straight(4, 2, 0.25),  // 4 chords, 2 beats each
+	Rhythm.clave(\son, 0.5),
 	Pbind(\instrument, \ePad)
 ).play(~clock);
 
 ~bass = Pchain(
 	~prog.bassLine.octave(-2),
-	Rhythm.straight(8, 1, 0.7),  // 8 notes, 1 beat each
+	Rhythm.straight(8, 4, 0.7),  // 8 notes, 1 beat each
 	Pbind(\instrument, \eBass, \cutoff, 500)
 ).play(~clock);
 
@@ -152,15 +149,3 @@ postln("Roman numeral progression: vi-IV-I-V in C");
 ~hat.stop;
 )
 
-
-(
-~hat = Pchain(
-	Rhythm.clave(\son),
-	Pbind(
-		\instrument, \eHat,
-		\sustain, 0.02
-	)
-).play;
-)
-
-~hat.stop;

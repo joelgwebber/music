@@ -15,6 +15,20 @@ Rhythm : Pattern {
   var <rawDurations, <velocities, <gates, <timebase;
 
   /*
+  Create a single sustained note rhythm.
+
+  Arguments:
+    dur - Duration of the note (default: 1)
+    vel - Velocity/amplitude (default: 0.7)
+
+  Example:
+    Rhythm.note(4)  // Single 4-beat note
+  */
+  *note { |dur = 1, vel = 0.7|
+    ^Rhythm([dur], [vel]);
+  }
+
+  /*
   Create a straight rhythm pattern with even spacing.
 
   Arguments:
