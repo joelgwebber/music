@@ -85,7 +85,7 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 // Test it sounds the same as our manual version
 ~test_roman = Pchain(
 	~prog_roman,
-	Rhythm.straight(4, 2, 0.25),
+	Rhythm.straight(4),
 	Pbind(\instrument, \ePad)
 ).play(~clock);
 )
@@ -104,7 +104,7 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 
 ~jazz = Pchain(
 	~borrowed,
-	Rhythm.straight(4, 2, 0.25),
+	Rhythm.straight(4),
 	Pbind(\instrument, \ePad)
 ).play(~clock);
 )
@@ -117,13 +117,13 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 ~prog = ~jazz_prog;
 ~chords = Pchain(
 	~prog,
-	Rhythm.clave(\son, 0.5),
+	Rhythm.clave(\son),
 	Pbind(\instrument, \ePad)
 ).play(~clock);
 
 ~bass = Pchain(
 	~prog.bassLine.octave(-2),
-	Rhythm.straight(8, 4, 0.7),  // 8 notes, 1 beat each
+	Rhythm.straight(8),  // 8 notes
 	Pbind(\instrument, \eBass, \cutoff, 500)
 ).play(~clock);
 

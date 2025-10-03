@@ -60,48 +60,39 @@ Voice : Pattern {
   // Renders the voice as a tablature-style string showing notes and durations.
   // maxDur: Maximum duration to render (default: rhythm.totalDuration)
   // Returns: String with notes aligned with their rhythmic positions in scientific notation.
+  // Each subdivision renders as 3 characters. Notes are followed by dashes for their duration.
   asTab { |maxDur|
     var notes = this.notes;
     var scientificNotes = melody.scientific;
-    var durs = rhythm.durations;
+    var numerators = rhythm.numerators;
+    var denominator = rhythm.denominator;
     var targetDur = maxDur ?? rhythm.totalDuration;
     var str = "";
-    var charsPerBeat = 4;
-    var noteWidth = 4;  // 3 chars for note + 1 space separator
-    var targetChars = (targetDur * charsPerBeat).asInteger;
-    var pos = 0;
+    var charsPerSubdiv = 3;  // Each subdivision = 3 characters
+
+    // Calculate how many rhythm cycles we need
+    var targetSubdivisions = (targetDur * denominator).asInteger;
+    var rhythmDuration = numerators.sum;  // Should equal denominator
+    var numCycles = (targetSubdivisions / rhythmDuration).ceil.asInteger;
     var noteIdx = 0;
+    var rhythmIdx = 0;
 
-    // Keep adding notes until we fill the target duration
-    while { pos < targetChars } {
-      var dur = durs.wrapAt(noteIdx);
-      var numChars = (dur * charsPerBeat).asInteger.max(noteWidth);
+    // Render each note in the rhythm pattern, repeating as needed
+    (numCycles * numerators.size).do { |i|
       var noteStr = scientificNotes.wrapAt(noteIdx);
-      var remainingChars = targetChars - pos;
+      var numerator = numerators.wrapAt(rhythmIdx);
+      var totalChars = numerator * charsPerSubdiv;
 
-      // Only use as many chars as we have room for
-      numChars = min(numChars, remainingChars);
+      // Render note name (3 chars)
+      str = str ++ noteStr;
 
-      // If we have room for at least the note + space, add it
-      if (numChars >= noteWidth) {
-        str = str ++ noteStr ++ " ";  // Add space after note
-        pos = pos + noteWidth;
-        numChars = numChars - noteWidth;
-
-        // Pad with dashes for remaining duration
-        numChars.do {
-          str = str ++ "-";
-          pos = pos + 1;
-        };
-      } {
-        // Not enough room for full note, just pad to end
-        numChars.do {
-          str = str ++ "-";
-          pos = pos + 1;
-        };
+      // Pad with dashes for remaining duration
+      (totalChars - charsPerSubdiv).do {
+        str = str ++ "-";
       };
 
       noteIdx = noteIdx + 1;
+      rhythmIdx = rhythmIdx + 1;
     };
 
     ^str;

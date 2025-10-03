@@ -1,31 +1,36 @@
 /*
 Rhythm - Pattern-based rhythm generator with various rhythm patterns
 
-Rhythm represents timing patterns with durations (including rests), velocities,
-and gate values. It can generate common rhythm patterns like straight time,
-swing, clave patterns, and Euclidean rhythms.
+Rhythm represents timing patterns with rational durations (numerator/denominator),
+velocities, and gate values. Uses integer subdivisions for exact timing.
+
+The denominator represents the subdivision unit (e.g., 4=quarters, 8=eighths, 12=triplets)
+The numerators represent how many subdivisions each note occupies.
 
 Example usage:
-  Rhythm.straight(8, 0.25).play;
-  Rhythm.clave(\son).asString;  // |X..X|..X.|..X.|X...|
-  Rhythm.euclidean(5, 8, 0.25).play;
+  Rhythm.straight(8)      // 8 equal notes: numerators=[1,1,1,1,1,1,1,1], denom=8
+  Rhythm.swing(4)         // 4 swing pairs: numerators=[2,1,2,1,2,1,2,1], denom=12
+  Rhythm.note(4)          // Single note: numerators=[4], denom=4
 */
 
 Rhythm : Pattern {
-  var <rawDurations, <velocities, <gates, <timebase;
+  var <numerators, <denominator, <velocities, <gates, <timebase;
 
   /*
   Create a single sustained note rhythm.
 
   Arguments:
-    dur - Duration of the note (default: 1)
+    dur - Duration of the note in beats (default: 1)
     vel - Velocity/amplitude (default: 0.7)
 
   Example:
-    Rhythm.note(4)  // Single 4-beat note
+    Rhythm.note(1)   // Single whole note: [1] / 1
+    Rhythm.note(4)   // Single 4-beat note: [4] / 4
   */
   *note { |dur = 1, vel = 0.7|
-    ^Rhythm([dur], [vel]);
+    // A single note measure: numerator = denominator = duration
+    var denom = dur.asInteger.max(1);
+    ^Rhythm([denom], denom, [vel]);
   }
 
   /*
@@ -33,49 +38,58 @@ Rhythm : Pattern {
 
   Arguments:
     n - Number of steps (default: 4)
-    dur - Duration per step (default: 1)
     vel - Velocity/amplitude (default: 0.7)
 
   Example:
-    Rhythm.straight(8, 0.25)  // |XXXX|XXXX| (8 steps)
+    Rhythm.straight(4)   // 4 equal notes: [1,1,1,1] / 4
+    Rhythm.straight(8)   // 8 equal notes: [1,1,1,1,1,1,1,1] / 8
+    Rhythm.straight(3)   // 3 equal notes: [1,1,1] / 3
   */
-  *straight { |n = 4, dur = 1, vel = 0.7|
-    var durs = Array.fill(n, dur);
+  *straight { |n = 4, vel = 0.7|
+    var numerators = Array.fill(n, 1);
     var vels = Array.fill(n, vel);
-    ^Rhythm(durs, vels);
+    ^Rhythm(numerators, n, vels);
   }
 
   /*
-  Create a swing rhythm pattern with uneven eighth notes.
+  Create a triplet swing rhythm pattern with 2:1 ratio (long-short pairs).
 
   Arguments:
-    n - Number of steps (default: 4)
-    ratio - Swing ratio, where 0.67 = 2:1 triplet feel (default: 0.67)
-    dur - Base duration (default: 1)
+    n - Number of swing pairs (default: 4)
     vel - Base velocity (default: 0.7)
 
   Example:
-    Rhythm.swing(8, 0.67, 0.25)  // Long-short pattern
+    Rhythm.swing(4)  // 4 swing pairs (8 notes): [2,1,2,1,2,1,2,1] / 12
 
-  The ratio determines the proportion of duration for the first note:
-    0.5 = straight (even)
-    0.67 = triplet swing (2:1)
-    0.75 = harder swing
+  Creates triplet-based swing where each pair takes 3 subdivisions:
+    long note = 2 subdivisions, short note = 1 subdivision
   */
-  *swing { |n = 4, ratio = 0.67, dur = 1, vel = 0.7|
-    var durs = Array.new(n);
-    var vels = Array.new(n);
-    (n/2).asInteger.do { |i|
-      durs.add(dur * ratio);
-      durs.add(dur * (1 - ratio));
+  *swing { |n = 4, vel = 0.7|
+    var numerators = Array.new(n * 2);
+    var vels = Array.new(n * 2);
+    var denom = n * 3;  // n pairs, each pair takes 3 subdivisions
+
+    n.do { |i|
+      numerators.add(2);  // Long note
+      numerators.add(1);  // Short note
       vels.add(vel);
       vels.add(vel * 0.8);
     };
-    if (n.odd) {
-      durs.add(dur);
-      vels.add(vel);
+
+    ^Rhythm(numerators, denom, vels);
+  }
+
+  /*
+  Find appropriate denominator for a duration.
+  Uses common subdivisions: 4 (sixteenths), 3 (triplets), 12 (fine triplets), etc.
+  */
+  *findDenominator { |dur|
+    var candidates = [4, 3, 8, 12, 16, 6, 24];
+    candidates.do { |denom|
+      var product = dur * denom;
+      if ((product - product.round).abs < 0.001) { ^denom };
     };
-    ^Rhythm(durs.keep(n), vels.keep(n));
+    ^12;  // Default fallback
   }
 
   /*
@@ -83,7 +97,6 @@ Rhythm : Pattern {
 
   Arguments:
     type - Clave type: \son, \rumba, or \bossa (default: \son)
-    dur - Duration per step (default: 0.25)
 
   Returns a 16-step pattern with 5 hits distributed according to the clave type:
 
@@ -92,9 +105,9 @@ Rhythm : Pattern {
     Bossa clave:       |X..X|..X.|..X.|.X..|  (hits at 0,3,6,10,13)
 
   Example:
-    Rhythm.clave(\son).play(TempoClock(120/60))
+    Rhythm.clave(\son)  // [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1] / 16 with vel pattern
   */
-  *clave { |type = \son, dur = 0.25|
+  *clave { |type = \son|
     var patterns = (
       // Son clave: hits at steps 0, 3, 6, 10, 12
       son: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0],
@@ -104,13 +117,9 @@ Rhythm : Pattern {
       bossa: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0]
     );
     var pattern = patterns[type] ?? patterns[\son];
-    var durs = pattern.collect { |v|
-      case
-        { v == 1 } { dur }
-        { true } { Rest(dur) };
-    };
-    var vels = pattern.collect { |v| if(v == 1, 0.8, 0) };
-    ^Rhythm(durs, vels, timebase: 1);
+    var numerators = Array.fill(16, 1);  // All equal subdivisions
+    var vels = pattern.collect { |v| if(v == 1, 0.8, 0) };  // Velocity controls hits/rests
+    ^Rhythm(numerators, 16, vels);
   }
 
   /*
@@ -119,11 +128,11 @@ Rhythm : Pattern {
   Arguments:
     hits - Number of hits to distribute (k)
     steps - Total number of steps (n)
-    dur - Duration per step (default: 1)
     vel - Velocity for hits (default: 0.7)
 
   Uses Bjorklund's algorithm to generate rhythms used in traditional music
   from around the world. Distributes k hits as evenly as possible across n steps.
+  Creates a measure with steps subdivisions, using velocity to control hits/rests.
 
   Common patterns:
     E(3,8):  |X..X|..X.|  - Tresillo (Cuban)
@@ -132,7 +141,7 @@ Rhythm : Pattern {
     E(7,12): |X.X.|X.X.|X.X.X.  - Common in Persian music
 
   Example:
-    Rhythm.euclidean(5, 8, 0.25).play;
+    Rhythm.euclidean(5, 8).play;
 
   Algorithm visualization for E(5,8):
     Start:  [1][1][1][1][1] | [0][0][0]
@@ -140,15 +149,11 @@ Rhythm : Pattern {
     Step 2: [1,0,1][1,0,1]  | [1,0]
     Result: [1,0,1,0,1,0,1,1]
   */
-  *euclidean { |hits, steps, dur = 1, vel = 0.7|
+  *euclidean { |hits, steps, vel = 0.7|
     var pattern = this.bjorklund(hits, steps);
-    var durs = pattern.collect { |v|
-      case
-        { v == 1 } { dur }
-        { true } { Rest(dur) };
-    };
-    var vels = pattern.collect { |v| if(v == 1, vel, 0) };
-    ^Rhythm(durs, vels);
+    var numerators = Array.fill(steps, 1);  // All equal subdivisions
+    var vels = pattern.collect { |v| if(v == 1, vel, 0) };  // Velocity controls hits/rests
+    ^Rhythm(numerators, steps, vels);
   }
 
   /*
@@ -223,47 +228,59 @@ Rhythm : Pattern {
   }
 
   /*
-  Create a new Rhythm from durations, velocities, gates, and timebase.
+  Create a new Rhythm from integer numerators, denominator, velocities, gates, and timebase.
 
   Arguments:
-    durations - Array of durations (can include Rest() objects)
+    numerators - Array of integer numerators (subdivision counts per note)
+    denominator - Integer denominator (subdivision unit: 4=quarters, 8=eighths, 12=triplets)
     velocities - Array of velocities/amplitudes (default: 0.7 for all)
     gates - Array of gate/legato values (default: 0.9 for all)
     timebase - Global duration multiplier (default: 1)
 
   Example:
-    Rhythm([0.25, 0.25, Rest(0.25), 0.5], [0.8, 0.6, 0, 0.9])
+    Rhythm([1, 1, 1, 1], 4, [0.8, 0.6, 0.8, 0.9])  // Four quarter notes
+    Rhythm([2, 1, 2, 1], 3, [0.8, 0.6, 0.8, 0.6])  // Swing eighths (triplet feel)
   */
-  *new { |durations, velocities = nil, gates = nil, timebase = 1|
-    ^super.new.init(durations, velocities, gates, timebase);
+  *new { |numerators, denominator, velocities = nil, gates = nil, timebase = 1|
+    ^super.new.init(numerators, denominator, velocities, gates, timebase);
   }
 
-  init { |inDurations, inVelocities, inGates, inTimebase|
-    rawDurations = inDurations;
-    velocities = inVelocities ?? Array.fill(rawDurations.size, 0.7);
-    gates = inGates ?? Array.fill(rawDurations.size, 0.9);
+  init { |inNumerators, inDenominator, inVelocities, inGates, inTimebase|
+    var sum = inNumerators.sum;
+
+    // Validate that numerators sum equals denominator (well-formed measure)
+    if (sum != inDenominator) {
+      Error("Rhythm validation failed: numerators sum (%) != denominator (%). "
+            "Numerators must sum to denominator to form a complete measure."
+            .format(sum, inDenominator)).throw;
+    };
+
+    numerators = inNumerators;
+    denominator = inDenominator;
+    velocities = inVelocities ?? Array.fill(numerators.size, 0.7);
+    gates = inGates ?? Array.fill(numerators.size, 0.9);
     timebase = inTimebase;
   }
 
   /*
-  Returns scaled durations (rawDurations * timebase).
+  Returns scaled durations as floats (numerators / denominator * timebase).
   */
   durations {
-    ^rawDurations * timebase;
+    ^numerators.collect({ |num| (num / denominator) * timebase });
   }
 
   /*
   Returns total duration of one cycle through the pattern.
   */
   totalDuration {
-    ^rawDurations.sum * timebase;
+    ^(numerators.sum / denominator) * timebase;
   }
 
   /*
   Returns number of steps in the rhythm.
   */
   size {
-    ^rawDurations.size;
+    ^numerators.size;
   }
 
   /*
@@ -274,7 +291,8 @@ Rhythm : Pattern {
   */
   reverse {
     ^Rhythm(
-      rawDurations.reverse,
+      numerators.reverse,
+      denominator,
       velocities.reverse,
       gates.reverse,
       timebase
@@ -284,15 +302,20 @@ Rhythm : Pattern {
   /*
   Concatenates two rhythm patterns.
 
-  Note: Uses the timebase of the first rhythm. If rhythms have different
-  timebases, consider scaling them first.
+  Note: If rhythms have different denominators, finds LCM and scales accordingly.
 
   Example:
-    Rhythm.straight(4, 0.25) ++ Rhythm.euclidean(3, 8, 0.25)
+    Rhythm.straight(4) ++ Rhythm.euclidean(3, 8)
   */
   ++ { |other|
+    var lcm = this.lcm(denominator, other.denominator);
+    var scale1 = lcm / denominator;
+    var scale2 = lcm / other.denominator;
+    var newNums = (numerators * scale1) ++ (other.numerators * scale2);
+
     ^Rhythm(
-      rawDurations ++ other.rawDurations,
+      newNums,
+      lcm,
       velocities ++ other.velocities,
       gates ++ other.gates,
       timebase
@@ -311,7 +334,8 @@ Rhythm : Pattern {
   */
   copyRange { |start, end|
     ^Rhythm(
-      rawDurations.copyRange(start, end),
+      numerators.copyRange(start, end),
+      denominator,
       velocities.copyRange(start, end),
       gates.copyRange(start, end),
       timebase
@@ -324,7 +348,7 @@ Rhythm : Pattern {
   */
   embedInStream { |inval|
     inf.do { |i|
-      inval[\dur] = rawDurations.wrapAt(i) * timebase;
+      inval[\dur] = (numerators.wrapAt(i) / denominator) * timebase;
       inval[\amp] = velocities.wrapAt(i);
       inval[\legato] = gates.wrapAt(i);
       inval = inval.yield;
@@ -333,36 +357,78 @@ Rhythm : Pattern {
   }
 
   /*
+  Calculate least common multiple of two integers.
+  */
+  lcm { |a, b|
+    ^(a * b) / this.gcd(a, b);
+  }
+
+  /*
+  Calculate greatest common divisor of two integers.
+  */
+  gcd { |a, b|
+    var temp;
+    while { b != 0 } {
+      temp = b;
+      b = a % b;
+      a = temp;
+    };
+    ^a;
+  }
+
+  /*
   Format rhythm as text notation for visualization.
 
   Arguments:
-    groupBy - Number of steps per group (default: 4, nil = no grouping)
+    groupBy - Number of steps per group (default: rhythm length, nil = no grouping)
 
-  Returns a string with 'X' for hits and '.' for rests, grouped by bars.
+  Returns a string showing subdivisions with 'X' for hits and '.' for continuations.
 
   Examples:
-    Rhythm.clave(\son).asString      // |X..X|..X.|..X.|X...|
-    Rhythm.euclidean(5, 8).asString  // |X.X.|X.XX|
-    Rhythm.straight(8).asString(2)   // |XX|XX|XX|XX|
+    Rhythm.clave(\son).asString      // |X..X..X...X.X...|
+    Rhythm.euclidean(5, 8).asString  // |X.X.X.XX|
+    Rhythm.swing(4).asString(3)      // |X.X|X.X|X.X|X.X|
   */
-  asString { |groupBy = 4|
+  asString { |groupBy|
     var str = "";
-    var steps = rawDurations.size;
+    var subdivPos = 0;
+    var noteIdx = 0;
+    groupBy = groupBy ?? denominator;
 
-    rawDurations.do { |dur, i|
+    // Iterate through each subdivision in the measure
+    denominator.do { |subdivIdx|
+      var numerator, vel;
+
       // Add grouping separator
-      if ((i > 0) && (groupBy.notNil) && (i % groupBy == 0)) {
+      if ((subdivIdx > 0) && (groupBy.notNil) && (subdivIdx % groupBy == 0)) {
         str = str ++ "|";
       };
 
-      // X for hit, . for rest
-      if (dur.isRest) {
-        str = str ++ ".";
+      // Check if this subdivision starts a new note
+      numerator = numerators.wrapAt(noteIdx);
+      vel = velocities.wrapAt(noteIdx);
+
+      if (subdivPos == 0) {
+        // Start of a note
+        if (vel > 0) {
+          str = str ++ "X";
+        } {
+          str = str ++ ".";  // Rest
+        };
+        subdivPos = subdivPos + 1;
       } {
-        str = str ++ "X";
+        // Continuation of current note
+        str = str ++ ".";
+        subdivPos = subdivPos + 1;
+      };
+
+      // Move to next note if we've used up this note's duration
+      if (subdivPos >= numerator) {
+        subdivPos = 0;
+        noteIdx = noteIdx + 1;
       };
     };
 
-    ^"|" ++ str ++ "| (" ++ steps ++ " steps)";
+    ^"|" ++ str ++ "| (" ++ numerators.size ++ " notes, " ++ numerators.sum ++ "/" ++ denominator ++ ")";
   }
 }

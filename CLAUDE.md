@@ -45,6 +45,9 @@ Multiple example compositions demonstrating various techniques and musical ideas
 3. Boot server with: `Server.local.boot;`
 4. Load instruments: `"lib/instruments.scd".load;`
 
+### SClang quirks
+- vars must *always* be at the start of a block.
+
 ### Working with Progressions
 ```supercollider
 // Create chromatic chord

@@ -1,10 +1,10 @@
+// Moonlight Sonata - First phrase (M1-5)
+// Using Voice class to structure bass and harmony lines
+
 (
 Server.local.boot;
 "/Users/joel/src/rs/music/piano.scd".load;
 )
-
-// Moonlight Sonata - First phrase (M1-5)
-// Using Voice class to structure bass and harmony lines
 
 (
 ~clock = TempoClock(60/60); // Very slow, ~60 BPM
@@ -20,7 +20,7 @@ Server.local.boot;
    ),
    arpeggio: Voice(
      Chord.minor(\Cs, 4).arp(\up),  // C#4-E4-G#4
-     Rhythm.straight(3, 0.333),
+     Rhythm.straight(3),
      (instrument: \piano, amp: 0.3, sustain: 2)
    )),  // M1-2: C#m
 
@@ -32,7 +32,7 @@ Server.local.boot;
    ),
    arpeggio: Voice(
      Chord(\Ds, [3, 3], 4).arp(\up),  // D#4-F#4-A4
-     Rhythm.straight(3, 0.333),
+     Rhythm.straight(3),
      (instrument: \piano, amp: 0.3, sustain: 2)
    )),  // M3: D#-F#-A (F#m/D#) = iv6
 
@@ -44,7 +44,7 @@ Server.local.boot;
    ),
    arpeggio: Voice(
      Chord(\E, [4, 5], 4).arp(\up),  // E4-G#4-C#5
-     Rhythm.straight(3, 0.333),
+     Rhythm.straight(3),
      (instrument: \piano, amp: 0.3, sustain: 2)
    )),  // M4: E-G#-C# (with octave jump)
 
@@ -56,7 +56,7 @@ Server.local.boot;
    ),
    arpeggio: Voice(
      Chord.major(\E, 4).arp(\up),  // E4-G#4-B4
-     Rhythm.straight(3, 0.333),
+     Rhythm.straight(3),
      (instrument: \piano, amp: 0.3, sustain: 2)
    ))  // M5: E major
 ];
