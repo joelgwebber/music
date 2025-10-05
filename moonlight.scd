@@ -1,17 +1,8 @@
 (
 // Moonlight Sonata - First phrase (M1-5)
 // Using Voice class to structure bass and harmony lines
-
 Server.local.boot;
 "/Users/joel/src/rs/music/piano.scd".load;
-)
-
-(
-Pphrase(4, (
-  arpeggio: Pvoice(Pchord(\Ds, [3, 3], 4).arp(\up), Prhythm.straight(12, 4)),
-  bass:     Pvoice(Pmelody([\Gs], octave: 2),       Prhythm.note(4)),
-)).asTab.postln;
-nil
 )
 
 (
@@ -23,7 +14,7 @@ nil
 ~bassRhythm = Prhythm.note(4);
 ~arpRhythm = Prhythm.straight(12, 4);
 
-~sections = [
+~phrases = [
   // M1-2: C#m (C#-E-G#)
   Pphrase(8, (
     arpeggio: Pvoice(Pchord.minor(\Cs, 4).arp(\up), ~arpRhythm,  ~right),
@@ -50,10 +41,10 @@ nil
 ];
 
 // Print section details with tablature
-~sections.do { |section, i| section.asTab.postln };
+~phrases.do { |section, i| section.asTab.postln };
 
-// Play sections sequentially - Section handles spawning voices internally
-~composition = Pseq(~sections);
+// Play phrases sequentially - Section handles spawning voices internally
+~composition = Pseq(~phrases);
 ~player = ~composition.play(~clock);
 )
 
