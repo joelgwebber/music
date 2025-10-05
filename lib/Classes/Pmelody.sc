@@ -1,12 +1,12 @@
-// Represents a sequence of single notes that form a melodic line.
-Melody : Notes {
+// Represents a sequence of single pitches that form a melodic line.
+Pmelody : Pitches {
   var <>notes;
 
-  // Creates a new Melody from an array of note numbers.
+  // Creates a new Pmelody from an array of note numbers.
   // notes: Array of chromatic note numbers or note symbols.
   // tuning: Tuning system to use (defaults to 12-tone equal temperament).
   // octave: Base octave offset (adds 12*octave to all notes).
-  // Returns: New Melody instance.
+  // Returns: New Pmelody instance.
   *new { |notes, tuning = (Tuning.et12), octave = 0|
     var processedNotes = notes.collect({ |note|
       var noteNum = Notation.noteToNumber(note);
@@ -15,12 +15,12 @@ Melody : Notes {
     ^super.new(tuning).initMelody(processedNotes);
   }
 
-  // Creates a Melody from a starting note and intervals.
+  // Creates a Pmelody from a starting note and intervals.
   // start: Starting note (number 0-11 or note symbol).
   // intervals: Array of semitone intervals.
   // tuning: Tuning system to use.
   // octave: Base octave offset.
-  // Returns: New Melody instance.
+  // Returns: New Pmelody instance.
   *fromIntervals { |start, intervals, tuning = (Tuning.et12), octave = 0|
     var startNote = Notation.noteToNumber(start) + (tuning.size * octave);
     var melodyNotes = [startNote];
@@ -31,7 +31,7 @@ Melody : Notes {
       melodyNotes = melodyNotes.add(currentNote);
     };
 
-    ^super.new(tuning).initMelody(melodyNotes);
+    ^super.new(tuning).initPmelody(melodyNotes);
   }
 
   // Creates a single-note Melody (convenience for bass lines).
@@ -51,7 +51,7 @@ Melody : Notes {
   // other: Another Melody to append.
   // Returns: New combined Melody.
   ++ { |other|
-    ^Melody(notes ++ other.notes, tuning);
+    ^Pmelody(notes ++ other.notes, tuning);
   }
 
   // Transposes all notes by octaves.
@@ -59,7 +59,7 @@ Melody : Notes {
   // Returns: New transposed Melody.
   octave { |steps|
     var transposedNotes = notes + (tuning.size * steps);
-    ^Melody(transposedNotes, tuning);
+    ^Pmelody(transposedNotes, tuning);
   }
 }
 

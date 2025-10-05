@@ -5,11 +5,11 @@
 // preserving Voice type.
 //
 // Examples:
-//   Voice(Melody([\C, \E, \G]), Rhythm.straight(3), (instrument: \piano, amp: 0.4))
-//   Voice(Chord.major(\C), Rhythm.note(2), (instrument: \piano, amp: 0.3))
+//   Pvoice(Pmelody([\C, \E, \G]), Rhythm.straight(3), (instrument: \piano, amp: 0.4))
+//   Pvoice(Chord.major(\C), Rhythm.note(2), (instrument: \piano, amp: 0.3))
 //     .chain(Pbind(\legato, 0.9))
 //
-Voice : Pattern {
+Pvoice : Pattern {
   var <melody, <rhythm, <timbre, <pattern;
 
   // Creates a new Voice from melody, rhythm, and timbre.
@@ -111,6 +111,6 @@ Voice : Pattern {
 
   // Returns a readable string representation.
   printOn { |stream|
-    stream << "Voice(" << melody.class.name << ", " << rhythm << ")";
+    stream << "Pvoice(" << melody.class.name << ", " << rhythm << ")";
   }
 }

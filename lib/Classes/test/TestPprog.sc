@@ -1,12 +1,12 @@
-TestProg : UnitTest {
+TestPprog : UnitTest {
 
   // Test basic progression construction
   test_construction {
     var chord1, chord2, prog;
 
-    chord1 = Chord.major(0, 0);
-    chord2 = Chord.minor(9, 0);
-    prog = Prog([chord1, chord2]);
+    chord1 = Pchord.major(0, 0);
+    chord2 = Pchord.minor(9, 0);
+    prog = Pprog([chord1, chord2]);
 
     this.assertEquals(prog.size, 2, "Prog should have 2 chords");
     this.assertEquals(prog.chords[0].root, 0, "First chord root should be 0");
@@ -91,7 +91,7 @@ TestProg : UnitTest {
   test_neoRiemannian {
     var start, prog;
 
-    start = Chord.major(0, 0);
+    start = Pchord.major(0, 0);
     prog = Prog.neoRiemannian(start, "PLR");
 
     this.assertEquals(prog.size, 4, "PLR should create 4 chords (start + 3 transforms)");
@@ -196,8 +196,8 @@ TestProg : UnitTest {
     var prog, bass, chord;
 
     // Test with inversions
-    chord = Chord.major(0, 0).invert(1);  // C major, first inversion (E in bass)
-    prog = Prog([chord]);
+    chord = Pchord.major(0, 0).invert(1);  // C major, first inversion (E in bass)
+    prog = Pprog([chord]);
     bass = prog.bassLine;
 
     this.assertEquals(bass.notes.size, 1, "Should have 1 bass note");

@@ -1,13 +1,13 @@
-TestSection : UnitTest {
+TestPphrase : UnitTest {
 
   // Test Section construction with array
   test_construction_array {
     var section, voice1, voice2;
 
-    voice1 = Voice(Melody([\C]), Rhythm.note(1));
-    voice2 = Voice(Melody([\E]), Rhythm.note(1));
+    voice1 = Pvoice(Pmelody([\C]), Prhythm.note(1));
+    voice2 = Pvoice(Pmelody([\E]), Prhythm.note(1));
 
-    section = Section(4, [voice1, voice2]);
+    section = Pphrase(4, [voice1, voice2]);
 
     this.assertEquals(section.duration, 4, "Duration should be 4");
     this.assertEquals(section.voices.size, 2, "Should have 2 voices");
@@ -19,10 +19,10 @@ TestSection : UnitTest {
   test_construction_event {
     var section, voice1, voice2;
 
-    voice1 = Voice(Melody([\C]), Rhythm.note(1));
-    voice2 = Voice(Melody([\E]), Rhythm.note(1));
+    voice1 = Pvoice(Pmelody([\C]), Prhythm.note(1));
+    voice2 = Pvoice(Pmelody([\E]), Prhythm.note(1));
 
-    section = Section(4, (bass: voice1, melody: voice2));
+    section = Pphrase(4, (bass: voice1, melody: voice2));
 
     this.assertEquals(section.duration, 4, "Duration should be 4");
     this.assertEquals(section.voices.size, 2, "Should have 2 voices");
@@ -34,10 +34,10 @@ TestSection : UnitTest {
   test_asTab_uniform {
     var section, voice1, voice2, tab;
 
-    voice1 = Voice(Melody([\C], octave: 4), Rhythm.straight(4, 1));
-    voice2 = Voice(Melody([\E], octave: 4), Rhythm.straight(4, 1));
+    voice1 = Pvoice(Pmelody([\C], octave: 4), Prhythm.straight(4, 1));
+    voice2 = Pvoice(Pmelody([\E], octave: 4), Prhythm.straight(4, 1));
 
-    section = Section(1, (v1: voice1, v2: voice2));
+    section = Pphrase(1, (v1: voice1, v2: voice2));
     tab = section.asTab();
 
     // Both voices have same denominator=4, so should align perfectly
@@ -50,12 +50,12 @@ TestSection : UnitTest {
     var section, bassVoice, arpVoice, tab;
 
     // Bass: 1 note in 1 beat (denominator=1)
-    bassVoice = Voice(Melody([\C], octave: 2), Rhythm.note(1));
+    bassVoice = Pvoice(Pmelody([\C], octave: 2), Prhythm.note(1));
 
     // Arpeggio: 4 notes in 1 beat (denominator=4)
-    arpVoice = Voice(Melody([\E, \G, \B, \E]), Rhythm.straight(4, 1));
+    arpVoice = Pvoice(Pmelody([\E, \G, \B, \E]), Prhythm.straight(4, 1));
 
-    section = Section(1, (bass: bassVoice, arp: arpVoice));
+    section = Pphrase(1, (bass: bassVoice, arp: arpVoice));
     tab = section.asTab();
 
     // Both lines should be visually aligned (can't verify size/dashes due to UTF-8)
@@ -71,8 +71,8 @@ TestSection : UnitTest {
     var section, voice, tab, cCount;
 
     // Voice with 1-beat rhythm in 4-beat section
-    voice = Voice(Melody([\C], octave: 4), Rhythm.note(1));
-    section = Section(4, (voice: voice));
+    voice = Pvoice(Pmelody([\C], octave: 4), Prhythm.note(1));
+    section = Pphrase(4, (voice: voice));
 
     tab = section.asTab();
 
@@ -86,11 +86,11 @@ TestSection : UnitTest {
     var section, v1, v2, v3, tab;
 
     // Denominators: 2, 3, 6 -> LCM = 6
-    v1 = Voice(Melody([\C]), Rhythm.straight(2, 1));  // denom=2
-    v2 = Voice(Melody([\E]), Rhythm.straight(3, 1));  // denom=3
-    v3 = Voice(Melody([\G]), Rhythm.straight(6, 1));  // denom=6
+    v1 = Pvoice(Pmelody([\C]), Prhythm.straight(2, 1));  // denom=2
+    v2 = Pvoice(Pmelody([\E]), Prhythm.straight(3, 1));  // denom=3
+    v3 = Pvoice(Pmelody([\G]), Prhythm.straight(6, 1));  // denom=6
 
-    section = Section(1, (v1: v1, v2: v2, v3: v3));
+    section = Pphrase(1, (v1: v1, v2: v2, v3: v3));
     tab = section.asTab();
 
     // All lines should be visually aligned (can't verify size/dashes due to UTF-8)
@@ -107,10 +107,10 @@ TestSection : UnitTest {
   test_asTab_labels {
     var section, v1, v2, tab, lines, shortLine, longLine, shortLabelEnd, longLabelEnd;
 
-    v1 = Voice(Melody([\C]), Rhythm.note(1));
-    v2 = Voice(Melody([\E]), Rhythm.note(1));
+    v1 = Pvoice(Pmelody([\C]), Prhythm.note(1));
+    v2 = Pvoice(Pmelody([\E]), Prhythm.note(1));
 
-    section = Section(1, (short: v1, verylongname: v2));
+    section = Pphrase(1, (short: v1, verylongname: v2));
     tab = section.asTab();
 
     lines = tab.split($\n);
@@ -131,18 +131,18 @@ TestSection : UnitTest {
 
     // Arpeggio with mix of sharps (3 visual chars) and naturals (3 visual chars, but more UTF-8 bytes)
     // D#4, F#4, A♮4 pattern
-    arpVoice = Voice(
-      Chord(\Ds, [3, 3], 4).arp(\up),
-      Rhythm.straight(12, 4)
+    arpVoice = Pvoice(
+      Pchord(\Ds, [3, 3], 4).arp(\up),
+      Prhythm.straight(12, 4)
     );
 
     // Bass with sharp (3 visual chars)
-    bassVoice = Voice(
-      Melody([\Gs], octave: 2),
-      Rhythm.note(4)
+    bassVoice = Pvoice(
+      Pmelody([\Gs], octave: 2),
+      Prhythm.note(4)
     );
 
-    section = Section(4, (arpeggio: arpVoice, bass: bassVoice));
+    section = Pphrase(4, (arpeggio: arpVoice, bass: bassVoice));
     tab = section.asTab();
 
     // Both lines should be visually aligned despite variable UTF-8 byte sizes

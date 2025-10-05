@@ -55,12 +55,12 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 (
 // Let's use a simple but effective progression
 // Am - F - C - G (vi - IV - I - V in C major)
-~am = Chord.minor(9, -1);  // A minor
-~f = Chord.major(5, -1);   // F major
-~c = Chord.major(0, -1);   // C major
-~g = Chord.major(7, -1);   // G major
+~am = Pchord.minor(9, -1);  // A minor
+~f = Pchord.major(5, -1);   // F major
+~c = Pchord.major(0, -1);   // C major
+~g = Pchord.major(7, -1);   // G major
 
-~prog = Prog([~am, ~f, ~c, ~g]);
+~prog = Pprog([~am, ~f, ~c, ~g]);
 )
 
 // Alternative approaches with the new Chord API:
@@ -69,12 +69,12 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 ~prog_roman = Prog.inKey(\C, [\vi, \IV, \I, \V]);
 
 // Approach 2: Neo-Riemannian transforms (good for voice-leading exploration)
-~c_root = Chord.major(\C, -2);
+~c_root = Pchord.major(\C, -2);
 ~am_from_c = ~c_root.r;  // Relative: C major -> A minor
 
 // Approach 3: Direct construction with convenience methods
-~am_direct = Chord.minor(\A, -1);
-~f_direct = Chord.major(\F, -1);
+~am_direct = Pchord.minor(\A, -1);
+~f_direct = Pchord.major(\F, -1);
 )
 
 // Simplification using the new Roman numeral notation:
@@ -85,7 +85,7 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 // Test it sounds the same as our manual version
 ~test_roman = Pchain(
 	~prog_roman,
-	Rhythm.straight(4),
+	Prhythm.straight(4),
 	Pbind(\instrument, \ePad)
 ).play(~clock);
 )
@@ -104,7 +104,7 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 
 ~jazz = Pchain(
 	~borrowed,
-	Rhythm.straight(4),
+	Prhythm.straight(4),
 	Pbind(\instrument, \ePad)
 ).play(~clock);
 )
@@ -117,13 +117,13 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 ~prog = ~jazz_prog;
 ~chords = Pchain(
 	~prog,
-	Rhythm.clave(\son),
+	Prhythm.clave(\son),
 	Pbind(\instrument, \ePad)
 ).play(~clock);
 
 ~bass = Pchain(
 	~prog.bassLine.octave(-2),
-	Rhythm.straight(8),  // 8 notes
+	Prhythm.straight(8),  // 8 notes
 	Pbind(\instrument, \eBass, \cutoff, 500)
 ).play(~clock);
 

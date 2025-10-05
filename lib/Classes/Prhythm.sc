@@ -22,7 +22,7 @@ Examples:
   Rhythm.euclidean(5, 8)  // 5 hits in 8 steps, 1 beat: [1,1,1,1,1,1,1,1]/8, total=1 beat
 */
 
-Rhythm : Pattern {
+Prhythm : Pattern {
   var <numerators, <denominator, <velocities, <gates;
 
   /*
@@ -38,7 +38,7 @@ Rhythm : Pattern {
   */
   *note { |beats = 1, vel = 0.7|
     // Single sustained note: denominator=1 (whole note resolution)
-    ^Rhythm([beats], 1, [vel]);
+    ^Prhythm([beats], 1, [vel]);
   }
 
   /*
@@ -67,7 +67,7 @@ Rhythm : Pattern {
 
     numerators = Array.fill(notes, 1);
     vels = Array.fill(notes, vel);
-    ^Rhythm(numerators, notes/beats, vels);
+    ^Prhythm(numerators, notes/beats, vels);
   }
 
   /*
@@ -97,7 +97,7 @@ Rhythm : Pattern {
       vels.add(vel * 0.8);
     };
 
-    ^Rhythm(numerators, denom, vels);
+    ^Prhythm(numerators, denom, vels);
   }
 
   /*
@@ -140,7 +140,7 @@ Rhythm : Pattern {
     var pattern = patterns[type] ?? patterns[\son];
     var numerators = Array.fill(16, 1);  // All equal subdivisions
     var vels = pattern.collect { |v| if(v == 1, 0.8, 0) };  // Velocity controls hits/rests
-    ^Rhythm(numerators, 16, vels);
+    ^Prhythm(numerators, 16, vels);
   }
 
   /*
@@ -174,7 +174,7 @@ Rhythm : Pattern {
     var pattern = this.bjorklund(hits, steps);
     var numerators = Array.fill(steps, 1);  // All equal subdivisions
     var vels = pattern.collect { |v| if(v == 1, vel, 0) };  // Velocity controls hits/rests
-    ^Rhythm(numerators, steps, vels);
+    ^Prhythm(numerators, steps, vels);
   }
 
   /*
@@ -262,10 +262,10 @@ Rhythm : Pattern {
     Total duration in beats = numerators.sum / denominator
 
   Examples:
-    Rhythm([1, 1, 1, 1], 4)       // Four quarter notes (total: 1 beat)
-    Rhythm([2, 1, 2, 1], 6)       // Swing eighths (total: 1 beat)
-    Rhythm([4], 1)                // Single 4-beat note
-    Rhythm([3, 3, 2], 8)          // Mixed eighths (total: 1 beat)
+    Prhythm([1, 1, 1, 1], 4)       // Four quarter notes (total: 1 beat)
+    Prhythm([2, 1, 2, 1], 6)       // Swing eighths (total: 1 beat)
+    Prhythm([4], 1)                // Single 4-beat note
+    Prhythm([3, 3, 2], 8)          // Mixed eighths (total: 1 beat)
   */
   *new { |numerators, denominator, velocities = nil, gates = nil|
     ^super.new.init(numerators, denominator, velocities, gates);
@@ -317,7 +317,7 @@ Rhythm : Pattern {
     Rhythm.euclidean(5, 8).reverse.asString
   */
   reverse {
-    ^Rhythm(
+    ^Prhythm(
       numerators.reverse,
       denominator,
       velocities.reverse,
@@ -339,7 +339,7 @@ Rhythm : Pattern {
     var scale2 = lcm / other.denominator;
     var newNums = (numerators * scale1) ++ (other.numerators * scale2);
 
-    ^Rhythm(
+    ^Prhythm(
       newNums,
       lcm,
       velocities ++ other.velocities,
@@ -358,7 +358,7 @@ Rhythm : Pattern {
     Rhythm.euclidean(5, 8).copyRange(0, 3)  // First 4 steps
   */
   copyRange { |start, end|
-    ^Rhythm(
+    ^Prhythm(
       numerators.copyRange(start, end),
       denominator,
       velocities.copyRange(start, end),

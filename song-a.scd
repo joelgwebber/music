@@ -51,8 +51,8 @@ SynthDef(\piano, {|out=0, freq=440, gate=1, amp=0.5, vel=0.7, sustain=1, pan=0|
 (
 ~clock = TempoClock.new(120/60); // 120 BPM
 ~piano = Pchain(
-  Rhythm.straight(4),
-  Chord.minor(\C, -1).arp,
+  Prhythm.straight(4),
+  Pchord.minor(\C, -1).arp,
   Pbind(\instrument, \piano, \vel, 0.7, \sustain, 1.5, \pan, 0)
 ).play(~clock);
 )

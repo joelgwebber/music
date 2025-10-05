@@ -1,4 +1,4 @@
-TestRhythm : UnitTest {
+TestPrhythm : UnitTest {
 
   // Test basic rhythm construction
   test_construction {
@@ -32,23 +32,23 @@ TestRhythm : UnitTest {
     var rhythm;
 
     // Default: 1 beat
-    rhythm = Rhythm.straight(4);
+    rhythm = Prhythm.straight(4);
     this.assertEquals(rhythm.numerators, [1, 1, 1, 1], "Straight 4 should be [1,1,1,1]");
     this.assertEquals(rhythm.denominator, 4, "Denominator should be 4");
     this.assertEquals(rhythm.totalDuration, 1.0, "Should create 1-beat pattern");
 
-    rhythm = Rhythm.straight(8);
+    rhythm = Prhythm.straight(8);
     this.assertEquals(rhythm.numerators.size, 8, "Straight 8 should have 8 notes");
     this.assertEquals(rhythm.denominator, 8, "Denominator should be 8");
     this.assertEquals(rhythm.totalDuration, 1.0, "Should create 1-beat pattern");
 
     // Custom beats parameter
-    rhythm = Rhythm.straight(12, 4);
+    rhythm = Prhythm.straight(12, 4);
     this.assertEquals(rhythm.numerators.size, 12, "Straight 12,4 should have 12 notes");
     this.assertEquals(rhythm.denominator, 3, "Denominator should be 3 (12 notes / 4 beats)");
     this.assertEquals(rhythm.totalDuration, 4.0, "Should create 4-beat pattern");
 
-    rhythm = Rhythm.straight(6, 2);
+    rhythm = Prhythm.straight(6, 2);
     this.assertEquals(rhythm.numerators.size, 6, "Straight 6,2 should have 6 notes");
     this.assertEquals(rhythm.denominator, 3, "Denominator should be 3 (6 notes / 2 beats)");
     this.assertEquals(rhythm.totalDuration, 2.0, "Should create 2-beat pattern");
@@ -58,7 +58,7 @@ TestRhythm : UnitTest {
   test_swing {
     var rhythm;
 
-    rhythm = Rhythm.swing(4);
+    rhythm = Prhythm.swing(4);
     this.assertEquals(rhythm.numerators, [2, 1, 2, 1, 2, 1, 2, 1], "Swing 4 should be [2,1,2,1,2,1,2,1]");
     this.assertEquals(rhythm.denominator, 12, "Denominator should be 12 (4 pairs * 3)");
     this.assertEquals(rhythm.totalDuration, 1.0, "Should create 1-beat pattern");
@@ -72,23 +72,23 @@ TestRhythm : UnitTest {
   test_note {
     var rhythm;
 
-    rhythm = Rhythm.note(1);
+    rhythm = Prhythm.note(1);
     this.assertEquals(rhythm.numerators, [1], "Note 1 should be [1]");
     this.assertEquals(rhythm.denominator, 1, "Denominator should be 1");
     this.assertEquals(rhythm.totalDuration, 1.0, "1-beat note should have totalDuration=1");
 
-    rhythm = Rhythm.note(4);
+    rhythm = Prhythm.note(4);
     this.assertEquals(rhythm.numerators, [4], "Note 4 should be [4]");
     this.assertEquals(rhythm.denominator, 1, "Denominator should be 1 (whole note resolution)");
     this.assertEquals(rhythm.totalDuration, 4.0, "4-beat note should have totalDuration=4");
 
-    rhythm = Rhythm.note(12);
+    rhythm = Prhythm.note(12);
     this.assertEquals(rhythm.numerators, [12], "Note 12 should be [12]");
     this.assertEquals(rhythm.denominator, 1, "Denominator should be 1");
     this.assertEquals(rhythm.totalDuration, 12.0, "12-beat note should have totalDuration=12");
 
     // Test with velocity parameter
-    rhythm = Rhythm.note(2, 0.5);
+    rhythm = Prhythm.note(2, 0.5);
     this.assertEquals(rhythm.numerators, [2], "Note 2 should be [2]");
     this.assertEquals(rhythm.velocities, [0.5], "Velocity should be [0.5]");
     this.assertEquals(rhythm.totalDuration, 2.0, "2-beat note should have totalDuration=2");
@@ -98,7 +98,7 @@ TestRhythm : UnitTest {
   test_clave {
     var rhythm, hitCount;
 
-    rhythm = Rhythm.clave(\son);
+    rhythm = Prhythm.clave(\son);
     this.assertEquals(rhythm.numerators.size, 16, "Clave should have 16 subdivisions");
     this.assertEquals(rhythm.denominator, 16, "Denominator should be 16");
     this.assertEquals(rhythm.totalDuration, 1.0, "Should create 1-beat pattern");
@@ -107,7 +107,7 @@ TestRhythm : UnitTest {
     hitCount = rhythm.velocities.count({ |v| v > 0 });
     this.assertEquals(hitCount, 5, "Son clave should have 5 hits");
 
-    rhythm = Rhythm.clave(\rumba);
+    rhythm = Prhythm.clave(\rumba);
     hitCount = rhythm.velocities.count({ |v| v > 0 });
     this.assertEquals(hitCount, 5, "Rumba clave should have 5 hits");
   }
@@ -117,7 +117,7 @@ TestRhythm : UnitTest {
     var rhythm, hitCount;
 
     // E(3,8) - Tresillo pattern
-    rhythm = Rhythm.euclidean(3, 8);
+    rhythm = Prhythm.euclidean(3, 8);
     this.assertEquals(rhythm.numerators.size, 8, "E(3,8) should have 8 subdivisions");
     this.assertEquals(rhythm.denominator, 8, "Denominator should be 8");
     this.assertEquals(rhythm.totalDuration, 1.0, "Should create 1-beat pattern");
@@ -126,7 +126,7 @@ TestRhythm : UnitTest {
     this.assertEquals(hitCount, 3, "E(3,8) should have 3 hits");
 
     // E(5,12) - West African bell pattern
-    rhythm = Rhythm.euclidean(5, 12);
+    rhythm = Prhythm.euclidean(5, 12);
     this.assertEquals(rhythm.numerators.size, 12, "E(5,12) should have 12 subdivisions");
     this.assertEquals(rhythm.denominator, 12, "Denominator should be 12");
     this.assertEquals(rhythm.totalDuration, 1.0, "Should create 1-beat pattern");

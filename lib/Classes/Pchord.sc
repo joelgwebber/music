@@ -16,7 +16,7 @@
 //   /  \  /  \  /  \  /  \  /  \  /  \  /  \  /  \  /
 // A♮----E♮----B♮----G♭----D♭----A♭----E♭----B♭----F♮
 //
-Chord : Notes {
+Pchord : Pitches {
   classvar <names;
   var <root, <intervals, <octave, <inversion;
 
@@ -35,7 +35,7 @@ Chord : Notes {
       {i}, i <- intervals};
   }
 
-  // Creates a new Chord from raw parameters.
+  // Creates a new Pchord from raw parameters.
   // root: Chromatic pitch class (0-11) or note symbol.
   // intervals: Array of semitone intervals between successive notes.
   // octave: Base octave for the chord.
@@ -56,7 +56,7 @@ Chord : Notes {
   // chord: Chord instance to copy.
   // Returns: New Chord with same properties.
   *newFrom { |chord|
-    ^Chord(chord.root, chord.intervals, chord.octave, chord.inversion);
+    ^Pchord(chord.root, chord.intervals, chord.octave, chord.inversion);
   }
 
   // Creates a Chord from a Roman numeral in a given key.
@@ -67,7 +67,7 @@ Chord : Notes {
   *inKey { |key = \C, numeral, octave = 0|
     var keyRoot, mode;
     #keyRoot, mode = Notation.parseKey(key);
-    ^Notation.romanToChord(keyRoot, mode, numeral, octave);
+    ^Notation.romanToPchord(keyRoot, mode, numeral, octave);
   }
 
   // Creates a Chord from a chord symbol.
@@ -75,7 +75,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Chord matching the symbol.
   *fromSymbol { |symbol, octave = 0|
-    ^Notation.symbolToChord(symbol, octave);
+    ^Notation.symbolToPchord(symbol, octave);
   }
 
   // Creates a major triad.
@@ -83,7 +83,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Major triad Chord.
   *major { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [4, 3], octave);
+    ^Pchord(Notation.noteToNumber(root), [4, 3], octave);
   }
 
   // Creates a minor triad.
@@ -91,7 +91,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Minor triad Chord.
   *minor { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [3, 4], octave);
+    ^Pchord(Notation.noteToNumber(root), [3, 4], octave);
   }
 
   // Creates a dominant 7th chord.
@@ -99,7 +99,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Dominant 7th Chord.
   *dom7 { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [4, 3, 3], octave);
+    ^Pchord(Notation.noteToNumber(root), [4, 3, 3], octave);
   }
 
   // Creates a major 7th chord.
@@ -107,7 +107,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Major 7th Chord.
   *maj7 { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [4, 3, 4], octave);
+    ^Pchord(Notation.noteToNumber(root), [4, 3, 4], octave);
   }
 
   // Creates a minor 7th chord.
@@ -115,7 +115,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Minor 7th Chord.
   *min7 { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [3, 4, 3], octave);
+    ^Pchord(Notation.noteToNumber(root), [3, 4, 3], octave);
   }
 
   // Creates a diminished triad.
@@ -123,7 +123,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Diminished triad Chord.
   *dim { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [3, 3], octave);
+    ^Pchord(Notation.noteToNumber(root), [3, 3], octave);
   }
 
   // Creates an augmented triad.
@@ -131,7 +131,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Augmented triad Chord.
   *aug { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [4, 4], octave);
+    ^Pchord(Notation.noteToNumber(root), [4, 4], octave);
   }
 
   // Creates a suspended 4th chord.
@@ -139,7 +139,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Sus4 Chord.
   *sus4 { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [5, 2], octave);
+    ^Pchord(Notation.noteToNumber(root), [5, 2], octave);
   }
 
   // Creates a suspended 2nd chord.
@@ -147,7 +147,7 @@ Chord : Notes {
   // octave: Base octave for the chord.
   // Returns: Sus2 Chord.
   *sus2 { |root, octave = 0|
-    ^Chord(Notation.noteToNumber(root), [2, 5], octave);
+    ^Pchord(Notation.noteToNumber(root), [2, 5], octave);
   }
 
   // Generates the actual note numbers for this chord.
@@ -186,23 +186,23 @@ Chord : Notes {
     (allNotes.size - 1).do { |i|
       newIntervals = newIntervals ++ [allNotes[i+1] - allNotes[i]];
     };
-    ^Chord(allNotes[0] - (tuning.size * octave), newIntervals, octave);
+    ^Pchord(allNotes[0] - (tuning.size * octave), newIntervals, octave);
   }
 
   // Transposes the chord by octaves.
   // steps: Number of octaves to transpose (positive = up, negative = down).
   // Returns: New transposed Chord.
-  oct { |steps| ^Chord(root, intervals, octave + steps, inversion) }
+  oct { |steps| ^Pchord(root, intervals, octave + steps, inversion) }
 
   // Creates an inversion of this chord.
   // steps: Number of inversions to apply.
   // Returns: New inverted Chord.
-  invert { |steps| ^Chord(root, intervals, octave, (inversion + steps) % this.size) }
+  invert { |steps| ^Pchord(root, intervals, octave, (inversion + steps) % this.size) }
 
   // Transposes the chord by semitones.
   // semitones: Number of semitones to transpose (positive = up, negative = down).
   // Returns: New transposed Chord.
-  transpose { |semitones| ^Chord(root + semitones, intervals, octave, inversion) }
+  transpose { |semitones| ^Pchord(root + semitones, intervals, octave, inversion) }
 
   // Converts a minor triad to major by swapping the third intervals.
   // Returns: New Chord with major quality.
@@ -213,7 +213,7 @@ Chord : Notes {
       newIntervals[0] = 4;
       newIntervals[1] = 3;
     };
-    ^Chord(root, newIntervals, octave);
+    ^Pchord(root, newIntervals, octave);
   }
 
   // Converts a major triad to minor by swapping the third intervals.
@@ -225,7 +225,7 @@ Chord : Notes {
       newIntervals[0] = 3;
       newIntervals[1] = 4;
     };
-    ^Chord(root, newIntervals, octave);
+    ^Pchord(root, newIntervals, octave);
   }
 
   // Adds a 7th to the chord.
@@ -237,7 +237,7 @@ Chord : Notes {
       { type == \dom } { 3 }
       { type == \maj } { 4 }
       { type == \min } { 3 };
-    ^Chord(root, newIntervals ++ [seventhInterval], octave);
+    ^Pchord(root, newIntervals ++ [seventhInterval], octave);
   }
 
   // Adds a 9th to the chord (includes 7th if not present).
@@ -247,25 +247,25 @@ Chord : Notes {
       { intervals.size == 2 } { intervals ++ [3, 4] }
       { intervals.size == 3 } { intervals ++ [4] }
       { intervals };
-    ^Chord(root, newIntervals, octave);
+    ^Pchord(root, newIntervals, octave);
   }
 
   // Replaces the chord with a sus4 version.
   // Returns: New sus4 Chord.
   withSus4 {
-    ^Chord(root, [5, 2], octave);
+    ^Pchord(root, [5, 2], octave);
   }
 
   // Replaces the chord with a sus2 version.
   // Returns: New sus2 Chord.
   withSus2 {
-    ^Chord(root, [2, 5], octave);
+    ^Pchord(root, [2, 5], octave);
   }
 
   // Neo-Riemannian P transformation: swaps major ↔ minor.
   // Returns: New Chord with opposite quality.
   parallel {
-    ^Chord(root, Chord.swapThirds(intervals), octave);
+    ^Pchord(root, Pchord.swapThirds(intervals), octave);
   }
 
   // Shorthand for parallel transformation.
@@ -278,10 +278,10 @@ Chord : Notes {
     var isMajor = (intervals[0] == 4);
     if (isMajor) {
       // Major to relative minor (sixth down = 9 semitones up)
-      ^Chord(root + 9, Chord.swapThirds(intervals), octave);
+      ^Pchord(root + 9, Pchord.swapThirds(intervals), octave);
     } {
       // Minor to relative major (minor third up)
-      ^Chord(root + 3, Chord.swapThirds(intervals), octave);
+      ^Pchord(root + 3, Pchord.swapThirds(intervals), octave);
     };
   }
 
@@ -295,10 +295,10 @@ Chord : Notes {
     var isMajor = (intervals[0] == 4);
     if (isMajor) {
       // Major to minor (up a major third)
-      ^Chord(root + 4, Chord.swapThirds(intervals), octave);
+      ^Pchord(root + 4, Pchord.swapThirds(intervals), octave);
     } {
       // Minor to major (down a major third)
-      ^Chord(root - 4, Chord.swapThirds(intervals), octave);
+      ^Pchord(root - 4, Pchord.swapThirds(intervals), octave);
     };
   }
 
@@ -314,7 +314,7 @@ Chord : Notes {
       { root + 1 },
       { root - 1 }
     );
-    ^Chord(newRoot, Chord.swapThirds(intervals), octave);
+    ^Pchord(newRoot, Pchord.swapThirds(intervals), octave);
   }
 
   // Shorthand for slide transformation.
@@ -326,8 +326,8 @@ Chord : Notes {
   nebenverwandt {
     var isMajor = (intervals[0] == 4);
     ^isMajor.if(
-      { Chord(root + 3, intervals, octave) },
-      { Chord(root - 3, intervals, octave) }
+      { Pchord(root + 3, intervals, octave) },
+      { Pchord(root - 3, intervals, octave) }
     );
   }
 
@@ -340,8 +340,8 @@ Chord : Notes {
   hexatonicPole {
     var isMajor = (intervals[0] == 4);
     ^isMajor.if(
-      { Chord(root + 8, [3, 4], octave) },
-      { Chord(root + 8, [4, 3], octave) }
+      { Pchord(root + 8, [3, 4], octave) },
+      { Pchord(root + 8, [4, 3], octave) }
     );
   }
 
@@ -385,7 +385,7 @@ Chord : Notes {
         }
       }
     );
-    ^Melody(arpNotes, tuning);
+    ^Pmelody(arpNotes, tuning);
   }
 
   // Creates a Pattern that plays this chord's notes in sequence.

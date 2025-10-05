@@ -1,10 +1,10 @@
-TestMelody : UnitTest {
+TestPmelody : UnitTest {
 
   // Test basic melody construction
   test_construction {
     var melody;
 
-    melody = Melody([0, 2, 4, 5, 7, 9, 11, 12]);
+    melody = Pmelody([0, 2, 4, 5, 7, 9, 11, 12]);
     this.assertEquals(melody.notes.size, 8, "Should have 8 notes");
     this.assertEquals(melody.notes[0], 0, "First note should be 0");
     this.assertEquals(melody.notes[7], 12, "Last note should be 12");
@@ -14,8 +14,8 @@ TestMelody : UnitTest {
   test_concatenation {
     var mel1, mel2, combined;
 
-    mel1 = Melody([0, 2, 4]);
-    mel2 = Melody([5, 7, 9]);
+    mel1 = Pmelody([0, 2, 4]);
+    mel2 = Pmelody([5, 7, 9]);
     combined = mel1 ++ mel2;
 
     this.assertEquals(combined.notes.size, 6, "Combined should have 6 notes");
@@ -28,7 +28,7 @@ TestMelody : UnitTest {
   test_octave {
     var melody, transposed;
 
-    melody = Melody([0, 4, 7]);
+    melody = Pmelody([0, 4, 7]);
     transposed = melody.octave(1);
 
     this.assertEquals(transposed.notes.size, 3, "Should preserve note count");
@@ -45,7 +45,7 @@ TestMelody : UnitTest {
   test_freqs {
     var melody, freqs;
 
-    melody = Melody([0, 12, 24]);  // C at different octaves
+    melody = Pmelody([0, 12, 24]);  // C at different octaves
     freqs = melody.freqs;
 
     this.assertEquals(freqs.size, 3, "Should have 3 frequencies");
@@ -57,10 +57,10 @@ TestMelody : UnitTest {
   test_size {
     var melody;
 
-    melody = Melody([0, 2, 4, 5, 7]);
+    melody = Pmelody([0, 2, 4, 5, 7]);
     this.assertEquals(melody.size, 5, "Size should be 5");
 
-    melody = Melody([]);
+    melody = Pmelody([]);
     this.assertEquals(melody.size, 0, "Empty melody should have size 0");
   }
 
@@ -68,7 +68,7 @@ TestMelody : UnitTest {
   test_pitchClass {
     var melody;
 
-    melody = Melody([0, 12, 24, -12]);
+    melody = Pmelody([0, 12, 24, -12]);
     this.assertEquals(melody.pitchClass(0), 0, "0 mod 12 should be 0");
     this.assertEquals(melody.pitchClass(12), 0, "12 mod 12 should be 0");
     this.assertEquals(melody.pitchClass(13), 1, "13 mod 12 should be 1");
@@ -79,7 +79,7 @@ TestMelody : UnitTest {
   test_fromChordArp {
     var chord, melody;
 
-    chord = Chord.major(0, 0);
+    chord = Pchord.major(0, 0);
     melody = chord.arp(\up);
 
     this.assertEquals(melody.class, Melody, "arp should return Melody");

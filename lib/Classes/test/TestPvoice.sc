@@ -1,12 +1,12 @@
-TestVoice : UnitTest {
+TestPvoice : UnitTest {
 
   // Test Voice construction
   test_construction {
     var voice, melody, rhythm;
 
-    melody = Melody([\C, \E, \G]);
-    rhythm = Rhythm.straight(4);
-    voice = Voice(melody, rhythm);
+    melody = Pmelody([\C, \E, \G]);
+    rhythm = Prhythm.straight(4);
+    voice = Pvoice(melody, rhythm);
 
     this.assertEquals(voice.melody, melody, "Melody should be stored");
     this.assertEquals(voice.rhythm, rhythm, "Rhythm should be stored");
@@ -17,9 +17,9 @@ TestVoice : UnitTest {
   test_asTab_default {
     var voice, melody, rhythm, tab;
 
-    melody = Melody([\C, \E, \G], octave: 4);
-    rhythm = Rhythm.straight(3, 1);  // 3 notes in 1 beat
-    voice = Voice(melody, rhythm);
+    melody = Pmelody([\C, \E, \G], octave: 4);
+    rhythm = Prhythm.straight(3, 1);  // 3 notes in 1 beat
+    voice = Pvoice(melody, rhythm);
 
     tab = voice.asTab();
 
@@ -34,9 +34,9 @@ TestVoice : UnitTest {
   test_asTab_maxDur {
     var voice, melody, rhythm, tab, cCount, eCount, gCount;
 
-    melody = Melody([\C, \E, \G], octave: 4);
-    rhythm = Rhythm.straight(3, 1);  // 3 notes in 1 beat
-    voice = Voice(melody, rhythm);
+    melody = Pmelody([\C, \E, \G], octave: 4);
+    rhythm = Prhythm.straight(3, 1);  // 3 notes in 1 beat
+    voice = Pvoice(melody, rhythm);
 
     // Render 2 beats (should get 6 notes: C E G C E G)
     tab = voice.asTab(2);
@@ -55,15 +55,15 @@ TestVoice : UnitTest {
   test_asTab_subdivsPerBeat {
     var voice1, voice2, melody, rhythm1, rhythm2, tab1, tab2;
 
-    melody = Melody([\C]);
+    melody = Pmelody([\C]);
 
     // Voice 1: 1 note in 1 beat (denominator=1)
-    rhythm1 = Rhythm.note(1);
-    voice1 = Voice(melody, rhythm1);
+    rhythm1 = Prhythm.note(1);
+    voice1 = Pvoice(melody, rhythm1);
 
     // Voice 2: 4 notes in 1 beat (denominator=4)
-    rhythm2 = Rhythm.straight(4, 1);
-    voice2 = Voice(melody, rhythm2);
+    rhythm2 = Prhythm.straight(4, 1);
+    voice2 = Pvoice(melody, rhythm2);
 
     // Render with same subdivsPerBeat for alignment
     tab1 = voice1.asTab(1, 4);  // Force 4 subdivs per beat
@@ -79,9 +79,9 @@ TestVoice : UnitTest {
   test_chord {
     var voice, chord, rhythm, notes;
 
-    chord = Chord.major(\C, 5);  // octave=5 gives C4 (MIDI 60)
-    rhythm = Rhythm.note(1);
-    voice = Voice(chord, rhythm);
+    chord = Pchord.major(\C, 5);  // octave=5 gives C4 (MIDI 60)
+    rhythm = Prhythm.note(1);
+    voice = Pvoice(chord, rhythm);
 
     notes = voice.notes;
 
@@ -96,9 +96,9 @@ TestVoice : UnitTest {
   test_arpeggio {
     var voice, chord, rhythm, notes;
 
-    chord = Chord.minor(\C, 4).arp(\up);  // octave=4 gives C3 (MIDI 48)
-    rhythm = Rhythm.straight(3, 1);
-    voice = Voice(chord, rhythm);
+    chord = Pchord.minor(\C, 4).arp(\up);  // octave=4 gives C3 (MIDI 48)
+    rhythm = Prhythm.straight(3, 1);
+    voice = Pvoice(chord, rhythm);
 
     notes = voice.notes;
 

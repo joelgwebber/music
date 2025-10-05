@@ -16,13 +16,15 @@ This is a SuperCollider music composition and live coding repository that contai
 ## Repository Structure
 
 ### Core Classes (lib/Classes/)
-- `Chord.sc`: Represents groups of notes with intervals, inversions, and tuning support
-- `Chromatic.sc`: Chromatic scale operations and transformations
-- `Diatonic.sc`: Diatonic scale operations
-- `Progression.sc`: Chord progression sequencing with neo-Riemannian transformations
-- `RhythmPattern.sc`: Rhythm pattern generation and manipulation
-- `ArpeggioPattern.sc`: Arpeggio pattern creation
-- `StrumPattern.sc`: Guitar-like strumming patterns
+All pattern classes follow SuperCollider's P-prefix convention:
+- `Pitches.sc`: Base class for pitch collections (renamed from Notes)
+- `Pchord.sc`: Chord pattern with intervals, inversions, tuning, and neo-Riemannian transformations
+- `Pmelody.sc`: Melodic sequence pattern (single-note lines)
+- `Prhythm.sc`: Rhythm pattern generation and manipulation
+- `Pvoice.sc`: Combines melody + rhythm + timbre into a single voice
+- `Pphrase.sc`: Timed container for parallel voices
+- `Pprog.sc`: Chord progression sequencing with neo-Riemannian transformations
+- `Notation.sc`: Utilities for note names, Roman numerals, and chord symbols
 
 ### Instruments and Sound (lib/)
 - `instruments.scd`: SynthDef definitions for various instruments
@@ -48,27 +50,38 @@ Multiple example compositions demonstrating various techniques and musical ideas
 ### SClang quirks
 - vars must *always* be at the start of a block.
 
-### Working with Progressions
+### Working with Chords and Progressions
 ```supercollider
-// Create chromatic chord
-var cm = Chromatic(3, [3, 4], -2);
-// Apply transformations
-var gm = cm.thirds(2);
+// Create a chord using factory methods
+var cm = Pchord.minor(\C, 4);
+// Apply neo-Riemannian transformations
+var gm = cm.transpose(7);
 // Create progression
-var prog = Progression([cm, gm]);
+var prog = Pprog([cm, gm]);
 // Play pattern
 p = prog.asPattern(\cfstring1, 0.5).play;
+
+// Create using Roman numerals
+var prog = Pprog.inKey(\C, [\I, \IV, \V, \I]);
+
+// Create a voice combining melody, rhythm, and timbre
+var voice = Pvoice(
+  Pchord.major(\C, 4).arp(\up),
+  Prhythm.straight(12, 4),
+  (instrument: \piano, amp: 0.3)
+);
 ```
 
 ### Neo-Riemannian Transformations
-The Progression class supports neo-Riemannian operations:
+Both Pchord and Pprog support neo-Riemannian operations:
 - P (Parallel): Major ↔ Minor
 - R (Relative): Relative major/minor
 - L (Leading tone): Leading tone exchange
 - S (Slide): Chromatic third relation
 - N (Nebenverwandt): Combination transformation
+- H (Hexatonic pole): Hexatonic cycle
 
-Chain operations with strings: `chord.neoRiemannian("PLR")`
+Chain operations with strings: `chord.neoRiemannian("PLR")` or use shorthand methods: `chord.p.l.r`
 
 ## Important Notes
 

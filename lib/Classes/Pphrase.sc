@@ -5,10 +5,10 @@
 // voice access.
 //
 // Examples:
-//   Section(4, [bassVoice, chordVoice])  // Array syntax
-//   Section(4, (bass: bassVoice, chords: chordVoice))  // Named syntax
+//   Pphrase(4, [bassVoice, chordVoice])  // Array syntax
+//   Pphrase(4, (bass: bassVoice, chords: chordVoice))  // Named syntax
 //
-Section : Pattern {
+Pphrase : Pattern {
   var <duration, <voices;
 
   // Creates a new Section with a duration and voices.
@@ -86,6 +86,6 @@ Section : Pattern {
 
   // Returns a readable string representation.
   printOn { |stream|
-    stream << "Section(" << duration << ", " << voices.size << " voices)";
+    stream << "Pphrase(" << duration << ", " << voices.size << " voices)";
   }
 }

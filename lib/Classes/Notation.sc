@@ -265,7 +265,7 @@ Notation {
     );
 
     // Create the chord
-    chord = Chord(chordRoot, intervals, octave);
+    chord = Pchord(chordRoot, intervals, octave);
 
     // TODO: Handle inversions based on bassNote
     if (parsed.bassNote.notNil) {
@@ -331,6 +331,6 @@ Notation {
     // Get intervals
     intervals = this.chordIntervals(quality, chordType);
 
-    ^Chord(root, intervals, octave);
+    ^Pchord(root, intervals, octave);
   }
 }

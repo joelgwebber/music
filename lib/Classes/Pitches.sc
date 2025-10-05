@@ -1,8 +1,8 @@
-// Represents an ordered group of notes, in a specific tuning.
+// Represents an ordered group of pitches, in a specific tuning.
 //
 // TODO:
 // - Parameterize root frequency.
-Notes : Pattern {
+Pitches : Pattern {
   var <tuning;
 
   *new { |tuning = (Tuning.at(\et12))|
