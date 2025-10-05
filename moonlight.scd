@@ -1,105 +1,60 @@
+(
 // Moonlight Sonata - First phrase (M1-5)
 // Using Voice class to structure bass and harmony lines
 
-(
 Server.local.boot;
 "/Users/joel/src/rs/music/piano.scd".load;
 )
 
 (
-~clock = TempoClock(60/60); // Very slow, ~60 BPM
+Section(4, (
+  arpeggio: Voice(Chord(\Ds, [3, 3], 4).arp(\up), Rhythm.straight(12, 4)),
+  bass:     Voice(Melody([\Gs], octave: 2),       Rhythm.note(4)),
+)).asTab.postln;
+nil
+)
 
-// Define sections: each has duration, bass voice, and arpeggio voice
-// Using MIDI/scientific pitch notation: C4 = middle C (MIDI 60)
+(
+~clock = TempoClock(60/60); // 60 BPM
+
+~left  = (instrument: \piano, amp: 0.4, sustain: 4);
+~right = (instrument: \piano, amp: 0.3, sustain: 2);
+
+~bassRhythm = Rhythm.note(4);
+~arpRhythm = Rhythm.straight(12, 4);
+
 ~sections = [
-  (dur: 8,
-   bass: Voice(
-     Melody([\Cs], octave: 2),  // C#2 (MIDI 25)
-     Rhythm.note(8),
-     (instrument: \piano, amp: 0.4, sustain: 4)
-   ),
-   arpeggio: Voice(
-     Chord.minor(\Cs, 4).arp(\up),  // C#4-E4-G#4
-     Rhythm.straight(3),
-     (instrument: \piano, amp: 0.3, sustain: 2)
-   )),  // M1-2: C#m
+  // M1-2: C#m (C#-E-G#)
+  Section(8, (
+    arpeggio: Voice(Chord.minor(\Cs, 4).arp(\up), ~arpRhythm,  ~right),
+    bass:     Voice(Melody([\Cs], octave: 2),     ~bassRhythm, ~left),
+  )),
 
-  (dur: 4,
-   bass: Voice(
-     Melody([\Gs], octave: 1),  // G#1 (MIDI 20)
-     Rhythm.note(4),
-     (instrument: \piano, amp: 0.4, sustain: 4)
-   ),
-   arpeggio: Voice(
-     Chord(\Ds, [3, 3], 4).arp(\up),  // D#4-F#4-A4
-     Rhythm.straight(3),
-     (instrument: \piano, amp: 0.3, sustain: 2)
-   )),  // M3: D#-F#-A (F#m/D#) = iv6
+  // M3: F#m/D# (D#-F#-A) = iv6
+  Section(4, (
+    arpeggio: Voice(Chord(\Ds, [3, 3], 4).arp(\up), ~arpRhythm,  ~right),
+    bass:     Voice(Melody([\Gs], octave: 2),       ~bassRhythm, ~left),
+  )),
 
-  (dur: 4,
-   bass: Voice(
-     Melody([\A], octave: 1),  // A1 (MIDI 21)
-     Rhythm.note(4),
-     (instrument: \piano, amp: 0.4, sustain: 4)
-   ),
-   arpeggio: Voice(
-     Chord(\E, [4, 5], 4).arp(\up),  // E4-G#4-C#5
-     Rhythm.straight(3),
-     (instrument: \piano, amp: 0.3, sustain: 2)
-   )),  // M4: E-G#-C# (with octave jump)
+  // M4: E-G#-C#
+  Section(4, (
+    arpeggio: Voice(Chord(\E, [4, 5], 4).arp(\up), ~arpRhythm,  ~right),
+    bass:     Voice(Melody([\A], octave: 2),       ~bassRhythm, ~left),
+  )),
 
-  (dur: 4,
-   bass: Voice(
-     Melody([\E], octave: 1),  // E1 (MIDI 16)
-     Rhythm.note(4),
-     (instrument: \piano, amp: 0.4, sustain: 4)
-   ),
-   arpeggio: Voice(
-     Chord.major(\E, 4).arp(\up),  // E4-G#4-B4
-     Rhythm.straight(3),
-     (instrument: \piano, amp: 0.3, sustain: 2)
-   ))  // M5: E major
+  // M5: EM (E-G#-B)
+  Section(4, (
+    arpeggio: Voice(Chord.major(\E, 4).arp(\up), ~arpRhythm,  ~right),
+    bass:     Voice(Melody([\E], octave: 2),     ~bassRhythm, ~left),
+  ))
 ];
 
 // Print section details with tablature
-~printSections = {
-  "=== Moonlight Sections ===".postln;
-  ~sections.do { |sec, i|
-    ("Section %: dur=%".format(i+1, sec.dur)).postln;
-    ("  Bass notes: %".format(sec.bass.notes)).postln;
-    ("  Bass tab:   %".format(sec.bass.asTab(sec.dur))).postln;
-    ("  Arp notes:  %".format(sec.arpeggio.notes)).postln;
-    ("  Arp tab:    %".format(sec.arpeggio.asTab(sec.dur))).postln;
-    "".postln;
-  };
-};
+~sections.do { |section, i| section.asTab.postln };
 
-~printSections.();
-
-// Spawner approach: layer bass + arpeggio voices
-~composition = Pspawner({ |sp|
-  ~sections.do { |section, i|
-    var duration = section[\dur];
-    var bassVoice = section[\bass];
-    var arpeggioVoice = section[\arpeggio];
-
-    ("Section %: dur=%".format(i+1, duration)).postln;
-
-    // Bass layer - Voice already contains all parameters
-    sp.par(Pfindur(duration, bassVoice));
-
-    // Arpeggio layer - Voice already contains all parameters
-    sp.par(Pfindur(duration, arpeggioVoice));
-
-    // Wait for section to complete before moving to next
-    sp.wait(duration);
-  };
-
-  "Phrase complete".postln;
-});
-
+// Play sections sequentially - Section handles spawning voices internally
+~composition = Pseq(~sections);
 ~player = ~composition.play(~clock);
 )
 
 ~player.stop;
-

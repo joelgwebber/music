@@ -5,8 +5,8 @@
 // preserving Voice type.
 //
 // Examples:
-//   Voice(Melody([\C, \E, \G]), [0.5, 0.5, 1], (instrument: \piano, amp: 0.4))
-//   Voice(Chord.major(\C), 2, (instrument: \piano, amp: 0.3))
+//   Voice(Melody([\C, \E, \G]), Rhythm.straight(3), (instrument: \piano, amp: 0.4))
+//   Voice(Chord.major(\C), Rhythm.note(2), (instrument: \piano, amp: 0.3))
 //     .chain(Pbind(\legato, 0.9))
 //
 Voice : Pattern {
@@ -58,41 +58,47 @@ Voice : Pattern {
   }
 
   // Renders the voice as a tablature-style string showing notes and durations.
+  // Uses a fixed number of characters per note for consistent alignment across voices.
+  //
   // maxDur: Maximum duration to render (default: rhythm.totalDuration)
+  // subdivsPerBeat: Subdivisions per beat for alignment (default: calculated from rhythm)
   // Returns: String with notes aligned with their rhythmic positions in scientific notation.
-  // Each subdivision renders as 3 characters. Notes are followed by dashes for their duration.
-  asTab { |maxDur|
+  asTab { |maxDur, subdivsPerBeat|
     var notes = this.notes;
     var scientificNotes = melody.scientific;
     var numerators = rhythm.numerators;
     var denominator = rhythm.denominator;
     var targetDur = maxDur ?? rhythm.totalDuration;
     var str = "";
-    var charsPerSubdiv = 3;  // Each subdivision = 3 characters
 
-    // Calculate how many rhythm cycles we need
-    var targetSubdivisions = (targetDur * denominator).asInteger;
-    var rhythmDuration = numerators.sum;  // Should equal denominator
-    var numCycles = (targetSubdivisions / rhythmDuration).ceil.asInteger;
-    var noteIdx = 0;
-    var rhythmIdx = 0;
+    // Calculate characters per beat based on rhythm density or override
+    // Scientific notation is always 3 visual chars, so 4 chars per subdiv gives 1 char spacing
+    var charsPerSubdiv = 4;
+    var actualSubdivsPerBeat = subdivsPerBeat ?? (numerators.size / rhythm.totalDuration);
+    var charsPerBeat = (actualSubdivsPerBeat * charsPerSubdiv).round.asInteger;
 
-    // Render each note in the rhythm pattern, repeating as needed
-    (numCycles * numerators.size).do { |i|
-      var noteStr = scientificNotes.wrapAt(noteIdx);
-      var numerator = numerators.wrapAt(rhythmIdx);
-      var totalChars = numerator * charsPerSubdiv;
+    // Calculate exact number of rhythm events to render
+    // targetDur / rhythm.totalDuration gives us how many complete cycles
+    // Multiply by numerators.size to get total events
+    var totalEvents = (targetDur / rhythm.totalDuration * numerators.size).round.asInteger;
 
-      // Render note name (3 chars)
+    // Render exactly that many events
+    totalEvents.do { |i|
+      var noteStr = scientificNotes.wrapAt(i);
+      var numerator = numerators.wrapAt(i);
+      var noteDuration = numerator / denominator;  // Duration in beats
+      var totalChars = (noteDuration * charsPerBeat).round.asInteger;
+      var padding;
+
+      // Render note name
       str = str ++ noteStr;
 
-      // Pad with dashes for remaining duration
-      (totalChars - charsPerSubdiv).do {
+      // Scientific notation is always 3 visual characters (note + accidental + octave)
+      // Don't use noteStr.size as it counts UTF-8 bytes, not visual characters
+      padding = totalChars - 3;
+      padding.do {
         str = str ++ "-";
       };
-
-      noteIdx = noteIdx + 1;
-      rhythmIdx = rhythmIdx + 1;
     };
 
     ^str;
