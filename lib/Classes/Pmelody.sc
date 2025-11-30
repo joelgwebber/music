@@ -7,10 +7,21 @@ Pmelody : Pitches {
   // tuning: Tuning system to use (defaults to 12-tone equal temperament).
   // octave: Base octave offset (adds 12*octave to all notes).
   // Returns: New Pmelody instance.
-  *new { |notes, tuning = (Tuning.et12), octave = 0|
+  *new { |notes, tuning = (Tuning.et12), octave = 4|
     var processedNotes = notes.collect({ |note|
-      var noteNum = Notation.noteToNumber(note);
-      noteNum + (tuning.size * octave);
+      if (note.isKindOf(Number)) {
+        // Raw MIDI numbers - use as-is without octave transformation
+        note;
+      } {
+        if (Notation.isOctaveSymbol(note)) {
+          // Octave-specific symbols like \Cs4, \Bb3 - convert directly to MIDI
+          Notation.symbolToMidi(note);
+        } {
+          // Basic symbols like \Cs, \Bb - convert and apply octave offset
+          var noteNum = Notation.noteToNumber(note);
+          noteNum + (tuning.size * octave);
+        };
+      };
     });
     ^super.new(tuning).initMelody(processedNotes);
   }

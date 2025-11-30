@@ -78,6 +78,59 @@ Notation {
     ^names[num % 12];
   }
 
+  // Converts a MIDI note number to octave-specific symbol.
+  // midiNote: MIDI note number (0-127).
+  // Returns: Symbol like \Cs4, \Bb3, etc.
+  *midiToSymbol { |midiNote|
+    var pitchClass = this.numberToNote(midiNote % 12);
+    var octave = (midiNote / 12).floor.asInteger - 1; // Standard MIDI octave calculation, ensure integer
+    var noteStr = pitchClass.asString;
+
+    // Convert Unicode sharp/flat symbols to 's'/'b' for SuperCollider compatibility
+    noteStr = noteStr.replace("♯", "s").replace("♭", "b");
+
+    ^(noteStr ++ octave.asString).asSymbol;
+  }
+
+  // Parses an octave-specific symbol to MIDI note number.
+  // symbol: Symbol like \Cs4, \Bb3, etc.
+  // Returns: MIDI note number.
+  *symbolToMidi { |symbol|
+    var str = symbol.asString;
+    var octave, noteStr, pitchClass, octaveStart;
+
+    // Extract octave number from end of string
+    if (str.size < 2) {
+      Error("Invalid octave symbol: %".format(symbol)).throw;
+    };
+
+    // Find where the octave number starts (last digit or negative sign)
+    octaveStart = str.size - 1;
+    while ({ (octaveStart > 0) && str[octaveStart].isDecDigit }) {
+      octaveStart = octaveStart - 1;
+    };
+    if (str[octaveStart] == $-) {
+      octaveStart = octaveStart - 1; // Include negative sign
+    };
+    octaveStart = octaveStart + 1;
+
+    noteStr = str.keep(octaveStart);
+    octave = str.drop(octaveStart).asInteger;
+
+    // Convert note string to symbol and get pitch class
+    pitchClass = this.noteToNumber(noteStr.asSymbol);
+
+    ^pitchClass + ((octave + 1) * 12);
+  }
+
+  // Checks if a symbol is an octave-specific note (contains digits).
+  // symbol: Symbol to check.
+  // Returns: Boolean.
+  *isOctaveSymbol { |symbol|
+    var str = symbol.asString;
+    ^str.any({ |char| char.isDecDigit });
+  }
+
   // Parses a key symbol into root pitch and mode.
   // key: Key symbol (e.g., \C for C major, \Am for A minor).
   // Returns: Array of [root pitch (0-11), mode symbol (\major or \minor)].
