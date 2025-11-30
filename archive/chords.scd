@@ -66,7 +66,7 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 // Alternative approaches with the new Chord API:
 (
 // Approach 1: Roman numerals (cleanest for diatonic progressions)
-~prog_roman = Prog.inKey(\C, [\vi, \IV, \I, \V]);
+~prog_roman = Pprog.inKey(\C, [\vi, \IV, \I, \V]);
 
 // Approach 2: Neo-Riemannian transforms (good for voice-leading exploration)
 ~c_root = Pchord.major(\C, -2);
@@ -80,7 +80,7 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 // Simplification using the new Roman numeral notation:
 (
 // Now we can use Roman numerals!
-~prog_roman = Prog.inKey(\C, [\vi, \IV, \I, \V]);
+~prog_roman = Pprog.inKey(\C, [\vi, \IV, \I, \V]);
 
 // Test it sounds the same as our manual version
 ~test_roman = Pchain(
@@ -94,13 +94,13 @@ SynthDef(\eHat, {|out=0, amp=0.3, sustain=0.05|
 // More examples of what's now possible:
 (
 // Jazz progression with extensions
-~jazz_prog = Prog.inKey(\C, [\Imaj7, \vi7, \ii7, \V7]);
+~jazz_prog = Pprog.inKey(\C, [\Imaj7, \vi7, \ii7, \V7]);
 
 // Minor key progression
-~minor_prog = Prog.inKey(\Am, [\i, \iv, \VI, \V]);
+~minor_prog = Pprog.inKey(\Am, [\i, \iv, \VI, \V]);
 
 // Borrowed chords (mixing major/minor)
-~borrowed = Prog.inKey(\C, [\I, \IV, \iv, \I]);  // IV to iv is a classic borrowed chord
+~borrowed = Pprog.inKey(\C, [\I, \IV, \iv, \I]);  // IV to iv is a classic borrowed chord
 
 ~jazz = Pchain(
 	~borrowed,

@@ -5,7 +5,7 @@ TestPchord : UnitTest {
     var chord;
 
     // Numeric construction
-    chord = Chord(0, [4, 3], 0);
+    chord = Pchord(0, [4, 3], 0);
     this.assertEquals(chord.root, 0, "Root should be 0");
     this.assertEquals(chord.intervals, [4, 3], "Intervals should be [4, 3]");
     this.assertEquals(chord.octave, 0, "Octave should be 0");

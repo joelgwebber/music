@@ -38,7 +38,9 @@ Pphrase : Pattern {
   embedInStream { |inval|
     var spawner = Pspawner({ |sp|
       voices.keysValuesDo { |key, voice|
-        sp.par(Pfindur(duration, voice));
+        if (duration == inf)
+          { sp.par(voice) }
+          { sp.par(Pfindur(duration, voice)); }
       };
       sp.wait(duration);
     });

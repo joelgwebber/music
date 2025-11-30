@@ -45,7 +45,7 @@ var cMajor = Chromatic(3, [4, 3], 0); // C major
 // Example 3: Creating a neo-Riemannian progression
 (
 var cMajor = Chromatic(3, [4, 3], 0);
-var prog = Prog.neoRiemannian(cMajor, "PLRPLR");
+var prog = Pprog.neoRiemannian(cMajor, "PLRPLR");
 
 p = prog(nil, \cfstring1).play;
 prog.names.postln;

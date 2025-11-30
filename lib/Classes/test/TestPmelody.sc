@@ -82,7 +82,7 @@ TestPmelody : UnitTest {
     chord = Pchord.major(0, 0);
     melody = chord.arp(\up);
 
-    this.assertEquals(melody.class, Melody, "arp should return Melody");
+    this.assertEquals(melody.class, Pmelody, "arp should return Pmelody");
     this.assertEquals(melody.notes.size, 3, "Should have 3 notes for triad");
     this.assertEquals(melody.notes[0], 0, "First note should be root");
 
@@ -98,10 +98,10 @@ TestPmelody : UnitTest {
   test_fromProgRoots {
     var prog, melody;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V, \I]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V, \I]);
     melody = prog.roots;
 
-    this.assertEquals(melody.class, Melody, "roots should return Melody");
+    this.assertEquals(melody.class, Pmelody, "roots should return Pmelody");
     this.assertEquals(melody.notes.size, 4, "Should have 4 notes");
     this.assertEquals(melody.notes[0], 0, "First root should be C");
     this.assertEquals(melody.notes[1], 5, "Second root should be F");
@@ -112,10 +112,10 @@ TestPmelody : UnitTest {
   test_fromProgBassLine {
     var prog, melody;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     melody = prog.bassLine;
 
-    this.assertEquals(melody.class, Melody, "bassLine should return Melody");
+    this.assertEquals(melody.class, Pmelody, "bassLine should return Pmelody");
     this.assertEquals(melody.notes.size, 3, "Should have 3 notes");
   }
 
@@ -123,10 +123,10 @@ TestPmelody : UnitTest {
   test_fromProgTopVoice {
     var prog, melody;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     melody = prog.topVoice;
 
-    this.assertEquals(melody.class, Melody, "topVoice should return Melody");
+    this.assertEquals(melody.class, Pmelody, "topVoice should return Pmelody");
     this.assertEquals(melody.notes.size, 3, "Should have 3 notes");
   }
 }

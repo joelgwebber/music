@@ -67,7 +67,7 @@ Pchord : Pitches {
   *inKey { |key = \C, numeral, octave = 0|
     var keyRoot, mode;
     #keyRoot, mode = Notation.parseKey(key);
-    ^Notation.romanToPchord(keyRoot, mode, numeral, octave);
+    ^Notation.romanToChord(keyRoot, mode, numeral, octave);
   }
 
   // Creates a Chord from a chord symbol.
@@ -75,7 +75,7 @@ Pchord : Pitches {
   // octave: Base octave for the chord.
   // Returns: Chord matching the symbol.
   *fromSymbol { |symbol, octave = 0|
-    ^Notation.symbolToPchord(symbol, octave);
+    ^Notation.symbolToChord(symbol, octave);
   }
 
   // Creates a major triad.
@@ -148,6 +148,32 @@ Pchord : Pitches {
   // Returns: Sus2 Chord.
   *sus2 { |root, octave = 0|
     ^Pchord(Notation.noteToNumber(root), [2, 5], octave);
+  }
+
+  // Creates a Pchord from MIDI note numbers.
+  // midiNotes: Array of MIDI note numbers (e.g., [60, 64, 67] for C major).
+  // Returns: Pchord with calculated root, intervals, and octave.
+  *fromMIDI { |midiNotes|
+    var sortedNotes, root, intervals, octave;
+
+    if (midiNotes.size == 0) {
+      Error("Cannot create chord from empty array").throw;
+    };
+
+    // Sort notes and remove duplicates
+    sortedNotes = midiNotes.as(Set).as(Array).sort;
+
+    // Calculate root pitch class and octave from lowest note
+    root = sortedNotes[0] % 12;
+    octave = (sortedNotes[0] / 12).floor - 5; // MIDI octave adjustment
+
+    // Calculate intervals between consecutive notes
+    intervals = [];
+    (sortedNotes.size - 1).do { |i|
+      intervals = intervals ++ [sortedNotes[i+1] - sortedNotes[i]];
+    };
+
+    ^Pchord(root, intervals, octave);
   }
 
   // Generates the actual note numbers for this chord.

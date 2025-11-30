@@ -18,7 +18,7 @@ TestPprog : UnitTest {
     var prog;
 
     // I-IV-V-I in C major
-    prog = Prog.inKey(\C, [\I, \IV, \V, \I]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V, \I]);
     this.assertEquals(prog.size, 4, "Should have 4 chords");
     this.assertEquals(prog.chords[0].root, 0, "I should be C");
     this.assertEquals(prog.chords[1].root, 5, "IV should be F");
@@ -26,14 +26,14 @@ TestPprog : UnitTest {
     this.assertEquals(prog.chords[3].root, 0, "I should be C");
 
     // vi-IV-I-V in C major (pop progression)
-    prog = Prog.inKey(\C, [\vi, \IV, \I, \V]);
+    prog = Pprog.inKey(\C, [\vi, \IV, \I, \V]);
     this.assertEquals(prog.chords[0].root, 9, "vi should be A");
     this.assertEquals(prog.chords[0].intervals, [3, 4], "vi should be minor");
     this.assertEquals(prog.chords[1].root, 5, "IV should be F");
     this.assertEquals(prog.chords[1].intervals, [4, 3], "IV should be major");
 
     // i-iv-V in A minor
-    prog = Prog.inKey(\Am, [\i, \iv, \V]);
+    prog = Pprog.inKey(\Am, [\i, \iv, \V]);
     this.assertEquals(prog.chords[0].root, 9, "i in Am should be A");
     this.assertEquals(prog.chords[0].intervals, [3, 4], "i should be minor");
     this.assertEquals(prog.chords[1].root, 2, "iv in Am should be D");
@@ -47,7 +47,7 @@ TestPprog : UnitTest {
     var prog;
 
     // Major ii-V-I
-    prog = Prog.ii_V_I(0, \major);
+    prog = Pprog.ii_V_I(0, \major);
     this.assertEquals(prog.size, 3, "Should have 3 chords");
     this.assertEquals(prog.chords[0].root, 2, "ii should be D");
     this.assertEquals(prog.chords[0].intervals, [3, 4], "ii should be minor");
@@ -56,14 +56,14 @@ TestPprog : UnitTest {
     this.assertEquals(prog.chords[2].root, 0, "I should be C");
 
     // Minor ii-V-i
-    prog = Prog.ii_V_I(9, \minor);
+    prog = Pprog.ii_V_I(9, \minor);
     this.assertEquals(prog.chords[0].root, 11, "ii in Am should be B");
     this.assertEquals(prog.chords[0].intervals, [3, 3], "ii should be diminished");
     this.assertEquals(prog.chords[2].root, 9, "i should be A");
     this.assertEquals(prog.chords[2].intervals, [3, 4], "i should be minor");
 
     // With symbolic key
-    prog = Prog.ii_V_I(\G, \major);
+    prog = Pprog.ii_V_I(\G, \major);
     this.assertEquals(prog.chords[2].root, 7, "I in G should be G");
   }
 
@@ -71,7 +71,7 @@ TestPprog : UnitTest {
   test_circleOfFifths {
     var prog;
 
-    prog = Prog.circleOfFifths(0, 4, \major);
+    prog = Pprog.circleOfFifths(0, 4, \major);
     this.assertEquals(prog.size, 4, "Should have 4 chords");
     this.assertEquals(prog.chords[0].root, 0, "Should start at C");
     this.assertEquals(prog.chords[1].root, 7, "Next should be G (up a fifth)");
@@ -79,11 +79,11 @@ TestPprog : UnitTest {
     this.assertEquals(prog.chords[3].root, 9, "Next should be A");
 
     // With dominant 7
-    prog = Prog.circleOfFifths(0, 3, \dominant7);
+    prog = Pprog.circleOfFifths(0, 3, \dominant7);
     this.assertEquals(prog.chords[0].intervals, [4, 3, 3], "Should be dom7");
 
     // With symbolic start
-    prog = Prog.circleOfFifths(\F, 3, \major);
+    prog = Pprog.circleOfFifths(\F, 3, \major);
     this.assertEquals(prog.chords[0].root, 5, "Should start at F");
   }
 
@@ -92,7 +92,7 @@ TestPprog : UnitTest {
     var start, prog;
 
     start = Pchord.major(0, 0);
-    prog = Prog.neoRiemannian(start, "PLR");
+    prog = Pprog.neoRiemannian(start, "PLR");
 
     this.assertEquals(prog.size, 4, "PLR should create 4 chords (start + 3 transforms)");
     this.assertEquals(prog.chords[0].root, 0, "Should start at C major");
@@ -103,7 +103,7 @@ TestPprog : UnitTest {
   test_transpose {
     var prog, transposed;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     transposed = prog.transpose(7);
 
     this.assertEquals(transposed.chords[0].root, 7, "I should transpose to G");
@@ -114,7 +114,7 @@ TestPprog : UnitTest {
   test_octave {
     var prog, moved;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     moved = prog.octave(1);
 
     this.assertEquals(moved.chords[0].octave, 1, "Octave should be 1");
@@ -125,7 +125,7 @@ TestPprog : UnitTest {
   test_invert {
     var prog, inverted;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     inverted = prog.invert(1);
 
     this.assertEquals(inverted.chords[0].inversion, 1, "First inversion");
@@ -136,7 +136,7 @@ TestPprog : UnitTest {
   test_reverse {
     var prog, reversed;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     reversed = prog.reverse;
 
     this.assertEquals(reversed.chords[0].root, 7, "First should be V (G)");
@@ -147,8 +147,8 @@ TestPprog : UnitTest {
   test_concatenation {
     var prog1, prog2, combined;
 
-    prog1 = Prog.inKey(\C, [\I, \IV]);
-    prog2 = Prog.inKey(\C, [\V, \I]);
+    prog1 = Pprog.inKey(\C, [\I, \IV]);
+    prog2 = Pprog.inKey(\C, [\V, \I]);
     combined = prog1 ++ prog2;
 
     this.assertEquals(combined.size, 4, "Combined should have 4 chords");
@@ -160,7 +160,7 @@ TestPprog : UnitTest {
   test_arp {
     var prog, melody;
 
-    prog = Prog.inKey(\C, [\I, \V]);
+    prog = Pprog.inKey(\C, [\I, \V]);
 
     // Single pattern for all chords
     melody = prog.arp(\up);
@@ -182,7 +182,7 @@ TestPprog : UnitTest {
   test_roots {
     var prog, roots;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     roots = prog.roots;
 
     this.assertEquals(roots.notes.size, 3, "Should have 3 roots");
@@ -208,7 +208,7 @@ TestPprog : UnitTest {
   test_topVoice {
     var prog, top;
 
-    prog = Prog.inKey(\C, [\I, \IV, \V]);
+    prog = Pprog.inKey(\C, [\I, \IV, \V]);
     top = prog.topVoice;
 
     this.assertEquals(top.notes.size, 3, "Should have 3 top notes");

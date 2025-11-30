@@ -1,7 +1,7 @@
 /*
-Rhythm - Pattern-based rhythm generator with various rhythm patterns
+Prhythm - Pattern-based rhythm generator with various rhythm patterns
 
-Rhythm represents timing patterns using rational durations (numerators/denominator),
+Prhythm represents timing patterns using rational durations (numerators/denominator),
 velocities, and gate values. Uses integer subdivisions for exact timing.
 
 Duration Model:
@@ -12,14 +12,14 @@ Duration Model:
 
 Factory Methods:
   Most create 1-beat rhythmic patterns (straight, swing, clave, euclidean)
-  Rhythm.note() creates sustained notes of arbitrary duration
+  Prhythm.note() creates sustained notes of arbitrary duration
 
 Examples:
-  Rhythm.straight(8)      // 8 equal notes in 1 beat:  [1,1,1,1,1,1,1,1]/8, total=1 beat
-  Rhythm.straight(8, 4)   // 8 equal notes in 4 beats: [1,1,1,1,1,1,1,1]/2, total=4 beats
-  Rhythm.swing(4)         // 4 swing pairs in 1 beat:  [2,1,2,1,2,1,2,1]/12, total=1 beat
-  Rhythm.note(4)          // Single 4-beat note: [4]/1, total=4 beats
-  Rhythm.euclidean(5, 8)  // 5 hits in 8 steps, 1 beat: [1,1,1,1,1,1,1,1]/8, total=1 beat
+  Prhythm.straight(8)      // 8 equal notes in 1 beat:  [1,1,1,1,1,1,1,1]/8, total=1 beat
+  Prhythm.straight(8, 4)   // 8 equal notes in 4 beats: [1,1,1,1,1,1,1,1]/2, total=4 beats
+  Prhythm.swing(4)         // 4 swing pairs in 1 beat:  [2,1,2,1,2,1,2,1]/12, total=1 beat
+  Prhythm.note(4)          // Single 4-beat note: [4]/1, total=4 beats
+  Prhythm.euclidean(5, 8)  // 5 hits in 8 steps, 1 beat: [1,1,1,1,1,1,1,1]/8, total=1 beat
 */
 
 Prhythm : Pattern {
@@ -33,8 +33,8 @@ Prhythm : Pattern {
     vel - Velocity/amplitude
 
   Example:
-    Rhythm.note(1)     // Single 1-beat note: [1] / 1
-    Rhythm.note(4)     // Single 4-beat note: [4] / 1
+    Prhythm.note(1)     // Single 1-beat note: [1] / 1
+    Prhythm.note(4)     // Single 4-beat note: [4] / 1
   */
   *note { |beats = 1, vel = 0.7|
     // Single sustained note: denominator=1 (whole note resolution)
@@ -52,11 +52,11 @@ Prhythm : Pattern {
   Creates equal notes across any number of beats(each note = notes/beats beat).
 
   Examples:
-    Rhythm.straight(4)     // 4 quarter notes over 1 beat        |xxxx|
-    Rhythm.straight(8)     // 8 eighth notes over 1 beat         |xxxx xxxx|
-    Rhythm.straight(8, 2)  // 8 eighth notes over 2 beats:       |xxxx|xxxx|
-    Rhythm.straight(6)     // 6 notes (2 triplets) over 1 beat   |xx xx xx|
-    Rhythm.straight(6, 3)  // 6 notes (2 triplets) over 3 beats: |xx|xx|xx|
+    Prhythm.straight(4)     // 4 quarter notes over 1 beat        |xxxx|
+    Prhythm.straight(8)     // 8 eighth notes over 1 beat         |xxxx xxxx|
+    Prhythm.straight(8, 2)  // 8 eighth notes over 2 beats:       |xxxx|xxxx|
+    Prhythm.straight(6)     // 6 notes (2 triplets) over 1 beat   |xx xx xx|
+    Prhythm.straight(6, 3)  // 6 notes (2 triplets) over 3 beats: |xx|xx|xx|
   */
   *straight { |notes = 4, beats = 1, vel = 0.7|
     var numerators, vels;
@@ -82,8 +82,8 @@ Prhythm : Pattern {
   This creates the classic jazz/blues swing feel.
 
   Examples:
-    Rhythm.swing(4)  // 4 swing pairs (8 notes): [2,1,2,1,2,1,2,1]/12, total=1 beat
-    Rhythm.swing(2)  // 2 swing pairs (4 notes): [2,1,2,1]/6, total=1 beat
+    Prhythm.swing(4)  // 4 swing pairs (8 notes): [2,1,2,1,2,1,2,1]/12, total=1 beat
+    Prhythm.swing(2)  // 2 swing pairs (4 notes): [2,1,2,1]/6, total=1 beat
   */
   *swing { |n = 4, vel = 0.7|
     var numerators = Array.new(n * 2);
@@ -126,7 +126,7 @@ Prhythm : Pattern {
     Bossa clave:       |X..X|..X.|..X.|.X..|  (hits at 0,3,6,10,13)
 
   Example:
-    Rhythm.clave(\son)  // [1,1,1,...,1]/16, total=1 beat, velocity pattern controls hits
+    Prhythm.clave(\son)  // [1,1,1,...,1]/16, total=1 beat, velocity pattern controls hits
   */
   *clave { |type = \son|
     var patterns = (
@@ -162,7 +162,7 @@ Prhythm : Pattern {
     E(7,12): |X.X.X.X.X.X.X.|  - Common in Persian music
 
   Example:
-    Rhythm.euclidean(5, 8)  // [1,1,1,1,1,1,1,1]/8, total=1 beat
+    Prhythm.euclidean(5, 8)  // [1,1,1,1,1,1,1,1]/8, total=1 beat
 
   Algorithm visualization for E(5,8):
     Start:  [1][1][1][1][1] | [0][0][0]
@@ -192,7 +192,7 @@ Prhythm : Pattern {
   distribution of hits across steps.
 
   Example:
-    Rhythm.bjorklund(5, 8)  // => [1,0,1,0,1,0,1,1]
+    Prhythm.bjorklund(5, 8)  // => [1,0,1,0,1,0,1,1]
 
   How it works for E(5,8):
     Initial: [1] [1] [1] [1] [1] | [0] [0] [0]
@@ -249,7 +249,7 @@ Prhythm : Pattern {
   }
 
   /*
-  Create a new Rhythm from integer numerators, denominator, velocities, and gates.
+  Create a new Prhythm from integer numerators, denominator, velocities, and gates.
 
   Arguments:
     numerators - Array of subdivision counts (duration of each note in subdivisions)
@@ -283,9 +283,9 @@ Prhythm : Pattern {
   Each value represents the duration of that note in beats.
 
   Example:
-    Rhythm.straight(4).durations    // => [0.25, 0.25, 0.25, 0.25]
-    Rhythm.note(3).durations        // => [3.0]
-    Rhythm.swing(2).durations       // => [0.333, 0.166, 0.333, 0.166]
+    Prhythm.straight(4).durations    // => [0.25, 0.25, 0.25, 0.25]
+    Prhythm.note(3).durations        // => [3.0]
+    Prhythm.swing(2).durations       // => [0.333, 0.166, 0.333, 0.166]
   */
   durations {
     ^numerators.collect({ |num| (num / denominator) });
@@ -295,9 +295,9 @@ Prhythm : Pattern {
   Returns total duration of one cycle through the pattern in beats.
 
   Examples:
-    Rhythm.straight(4).totalDuration   // => 1.0 beat
-    Rhythm.note(12).totalDuration      // => 12.0 beats
-    Rhythm.swing(4).totalDuration      // => 1.0 beat
+    Prhythm.straight(4).totalDuration   // => 1.0 beat
+    Prhythm.note(12).totalDuration      // => 12.0 beats
+    Prhythm.swing(4).totalDuration      // => 1.0 beat
   */
   totalDuration {
     ^(numerators.sum / denominator);
@@ -311,10 +311,10 @@ Prhythm : Pattern {
   }
 
   /*
-  Returns a new Rhythm with steps in reverse order.
+  Returns a new Prhythm with steps in reverse order.
 
   Example:
-    Rhythm.euclidean(5, 8).reverse.asString
+    Prhythm.euclidean(5, 8).reverse.asString
   */
   reverse {
     ^Prhythm(
@@ -331,7 +331,7 @@ Prhythm : Pattern {
   Note: If rhythms have different denominators, finds LCM and scales accordingly.
 
   Example:
-    Rhythm.straight(4) ++ Rhythm.euclidean(3, 8)
+    Prhythm.straight(4) ++ Prhythm.euclidean(3, 8)
   */
   ++ { |other|
     var lcm = this.lcm(denominator, other.denominator);
@@ -355,7 +355,7 @@ Prhythm : Pattern {
     end - Ending index (inclusive)
 
   Example:
-    Rhythm.euclidean(5, 8).copyRange(0, 3)  // First 4 steps
+    Prhythm.euclidean(5, 8).copyRange(0, 3)  // First 4 steps
   */
   copyRange { |start, end|
     ^Prhythm(
@@ -410,10 +410,10 @@ Prhythm : Pattern {
   Includes metadata showing note count and total duration (numerators.sum/denominator).
 
   Examples:
-    Rhythm.clave(\son).asString       // |X..X..X...X.X...| (16 notes, 16/16)
-    Rhythm.euclidean(5, 8).asString   // |X.X.X.XX| (8 notes, 8/8)
-    Rhythm.swing(4).asString(3)       // |X.X|X.X|X.X|X.X| (8 notes, 12/12)
-    Rhythm.note(4).asString           // |X| (1 notes, 4/1)
+    Prhythm.clave(\son).asString       // |X..X..X...X.X...| (16 notes, 16/16)
+    Prhythm.euclidean(5, 8).asString   // |X.X.X.XX| (8 notes, 8/8)
+    Prhythm.swing(4).asString(3)       // |X.X|X.X|X.X|X.X| (8 notes, 12/12)
+    Prhythm.note(4).asString           // |X| (1 notes, 4/1)
   */
   asString { |groupBy|
     var str = "";

@@ -6,7 +6,7 @@
 //
 // Examples:
 //   Pvoice(Pmelody([\C, \E, \G]), Rhythm.straight(3), (instrument: \piano, amp: 0.4))
-//   Pvoice(Chord.major(\C), Rhythm.note(2), (instrument: \piano, amp: 0.3))
+//   Pvoice(Pchord.major(\C), Prhythm.note(2), (instrument: \piano, amp: 0.3))
 //     .chain(Pbind(\legato, 0.9))
 //
 Pvoice : Pattern {
@@ -70,6 +70,7 @@ Pvoice : Pattern {
     var denominator = rhythm.denominator;
     var targetDur = maxDur ?? rhythm.totalDuration;
     var str = "";
+    var totalEvents;
 
     // Calculate characters per beat based on rhythm density or override
     // Scientific notation is always 3 visual chars, so 4 chars per subdiv gives 1 char spacing
@@ -77,10 +78,13 @@ Pvoice : Pattern {
     var actualSubdivsPerBeat = subdivsPerBeat ?? (numerators.size / rhythm.totalDuration);
     var charsPerBeat = (actualSubdivsPerBeat * charsPerSubdiv).round.asInteger;
 
+    // If unbounded, print enough to cover the rhythm duration.
+    (targetDur == inf).if {targetDur = rhythm.totalDuration};
+
     // Calculate exact number of rhythm events to render
     // targetDur / rhythm.totalDuration gives us how many complete cycles
     // Multiply by numerators.size to get total events
-    var totalEvents = (targetDur / rhythm.totalDuration * numerators.size).round.asInteger;
+    totalEvents = (targetDur / rhythm.totalDuration * numerators.size).round.asInteger;
 
     // Render exactly that many events
     totalEvents.do { |i|

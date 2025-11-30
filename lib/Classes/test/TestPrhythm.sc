@@ -5,7 +5,7 @@ TestPrhythm : UnitTest {
     var rhythm;
 
     // Basic construction
-    rhythm = Rhythm([1, 1, 1, 1], 4);
+    rhythm = Prhythm([1, 1, 1, 1], 4);
     this.assertEquals(rhythm.numerators, [1, 1, 1, 1], "Numerators should be [1, 1, 1, 1]");
     this.assertEquals(rhythm.denominator, 4, "Denominator should be 4");
   }
@@ -15,15 +15,15 @@ TestPrhythm : UnitTest {
     var rhythm;
 
     // Pattern where sum = denominator (1 beat total)
-    rhythm = Rhythm([2, 1, 1], 4);
+    rhythm = Prhythm([2, 1, 1], 4);
     this.assertEquals(rhythm.totalDuration, 1.0, "4/4 should equal 1 beat");
 
     // Pattern where sum != denominator (multi-beat note)
-    rhythm = Rhythm([12], 1);
+    rhythm = Prhythm([12], 1);
     this.assertEquals(rhythm.totalDuration, 12.0, "12/1 should equal 12 beats");
 
     // Pattern with custom subdivision
-    rhythm = Rhythm([3, 5], 2);
+    rhythm = Prhythm([3, 5], 2);
     this.assertEquals(rhythm.totalDuration, 4.0, "8/2 should equal 4 beats");
   }
 
@@ -139,13 +139,13 @@ TestPrhythm : UnitTest {
   test_totalDuration {
     var rhythm;
 
-    rhythm = Rhythm([1, 1, 1, 1], 4);
+    rhythm = Prhythm([1, 1, 1, 1], 4);
     this.assertEquals(rhythm.totalDuration, 1.0, "4/4 should equal 1 beat");
 
-    rhythm = Rhythm([2, 1, 2, 1, 2, 1, 2, 1], 12);
+    rhythm = Prhythm([2, 1, 2, 1, 2, 1, 2, 1], 12);
     this.assertEquals(rhythm.totalDuration, 1.0, "12/12 should equal 1 beat");
 
-    rhythm = Rhythm([3, 3, 2], 8);
+    rhythm = Prhythm([3, 3, 2], 8);
     this.assertEquals(rhythm.totalDuration, 1.0, "8/8 should equal 1 beat");
   }
 
@@ -153,10 +153,10 @@ TestPrhythm : UnitTest {
   test_velocityGates {
     var rhythm;
 
-    rhythm = Rhythm([1, 1, 1, 1], 4, [0.8, 0.6, 0.4, 0.2]);
+    rhythm = Prhythm([1, 1, 1, 1], 4, [0.8, 0.6, 0.4, 0.2]);
     this.assertEquals(rhythm.velocities, [0.8, 0.6, 0.4, 0.2], "Custom velocities should be preserved");
 
-    rhythm = Rhythm([1, 1, 1, 1], 4, [0.7, 0.7, 0.7, 0.7], [0.9, 0.5, 0.9, 0.5]);
+    rhythm = Prhythm([1, 1, 1, 1], 4, [0.7, 0.7, 0.7, 0.7], [0.9, 0.5, 0.9, 0.5]);
     this.assertEquals(rhythm.gates, [0.9, 0.5, 0.9, 0.5], "Custom gates should be preserved");
   }
 
@@ -165,7 +165,7 @@ TestPrhythm : UnitTest {
     var rhythm;
 
     // Rests should use velocity=0, not zero numerators
-    rhythm = Rhythm([1, 1, 1, 1], 4, [0.7, 0, 0.7, 0]);
+    rhythm = Prhythm([1, 1, 1, 1], 4, [0.7, 0, 0.7, 0]);
     this.assertEquals(rhythm.totalDuration, 1.0, "Pattern with rests should be 1 beat");
     this.assertEquals(rhythm.velocities[1], 0, "Rest should have velocity 0");
     this.assertEquals(rhythm.velocities[3], 0, "Rest should have velocity 0");

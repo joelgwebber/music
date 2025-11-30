@@ -9,7 +9,7 @@ Pprog : Pattern {
   // Creates a ii-V-I progression in the given key.
   // key: Root key (number 0-11 or note symbol).
   // mode: Key mode (\major or \minor).
-  // Returns: Prog with ii-V-I chords.
+  // Returns: Pprog with ii-V-I chords.
   *ii_V_I { |key = 0, mode = \major|
     var root, second, fifth;
     var chords;
@@ -33,7 +33,7 @@ Pprog : Pattern {
   // start: Starting note (number 0-11 or note symbol).
   // length: Number of chords to generate.
   // quality: Chord quality (\major, \minor, or \dominant7).
-  // Returns: Prog following the circle of fifths.
+  // Returns: Pprog following the circle of fifths.
   *circleOfFifths { |start = 0, length = 8, quality = \dominant7|
     var chords = [];
     var current = Notation.noteToNumber(start);
@@ -54,7 +54,7 @@ Pprog : Pattern {
   // Creates a neo-Riemannian progression from a starting chord and operations.
   // startChord: Initial Chord.
   // operations: Array of operation symbols (\P, \L, \R, \S, \N, \H) or strings.
-  // Returns: Prog with neo-Riemannian transformations applied.
+  // Returns: Pprog with neo-Riemannian transformations applied.
   *neoRiemannian { |startChord, operations|
     var chords = [startChord];
     var currentChord = startChord;
@@ -67,20 +67,20 @@ Pprog : Pattern {
     ^Pprog(chords);
   }
 
-  // Creates a new Prog from an array of Chords.
+  // Creates a new Pprog from an array of Chords.
   // chords: Array of Chord instances.
-  // Returns: New Prog instance.
+  // Returns: New Pprog instance.
   *new { |chords|
     ^super.new.init(chords);
   }
 
   // Create a progression from Roman numerals in a given key
   // Examples:
-  //   Prog.inKey(\C,  [\I, \vi, \IV, \V])     // C Am F G
-  //   Prog.inKey(\G,  [\I, \vi, \ii, \V])     // G Em Am D
-  //   Prog.inKey(\Am, [\i, \iv, \i, \V])      // Am Dm Am E
-  //   Prog.inKey(\C,  [\I, \V_E, \I])         // C G/E C (with inversion)
-  //   Prog.inKey(\C,  [\Imaj7, \vi7, \V7])    // Cmaj7 Am7 G7
+  //   Pprog.inKey(\C,  [\I, \vi, \IV, \V])     // C Am F G
+  //   Pprog.inKey(\G,  [\I, \vi, \ii, \V])     // G Em Am D
+  //   Pprog.inKey(\Am, [\i, \iv, \i, \V])      // Am Dm Am E
+  //   Pprog.inKey(\C,  [\I, \V_E, \I])         // C G/E C (with inversion)
+  //   Pprog.inKey(\C,  [\Imaj7, \vi7, \V7])    // Cmaj7 Am7 G7
   *inKey { |key = \C, numerals, octave = 0|
     var keyRoot, mode, chords;
 
@@ -89,7 +89,7 @@ Pprog : Pattern {
 
     // Build chords from Roman numerals
     chords = numerals.collect { |numeral|
-      Notation.romanToPchord(keyRoot, mode, numeral, octave);
+      Notation.romanToChord(keyRoot, mode, numeral, octave);
     };
 
     ^Pprog(chords);
@@ -102,7 +102,7 @@ Pprog : Pattern {
     // Validate that all chords have the same tuning
     inChords.do({ |chord|
       if (chord.tuning != tuning) {
-        Error("All chords in a Prog must share the same tuning.");
+        Error("All chords in a Pprog must share the same tuning.");
       }
     })
   }
@@ -152,7 +152,7 @@ Pprog : Pattern {
       },
       Array, {
         if(pattern.size == 0) {
-          Error("Empty array pattern provided to Prog.arp").throw;
+          Error("Empty array pattern provided to Pprog.arp").throw;
         };
 
         switch(pattern[0].class,
@@ -199,7 +199,7 @@ Pprog : Pattern {
 
   // Transposes all chords by semitones.
   // semitones: Number of semitones to transpose (positive = up, negative = down).
-  // Returns: New transposed Prog.
+  // Returns: New transposed Pprog.
   transpose { |semitones|
     var newChords = chords.collect({ |chord|
       chord.class.new(chord.root + semitones, chord.intervals, chord.octave, chord.inversion);
@@ -209,7 +209,7 @@ Pprog : Pattern {
 
   // Transposes all chords by octaves.
   // steps: Number of octaves to transpose (positive = up, negative = down).
-  // Returns: New transposed Prog.
+  // Returns: New transposed Pprog.
   octave { |steps|
     var newChords = chords.collect(_.oct(steps));
     ^Pprog(newChords);
@@ -217,21 +217,21 @@ Pprog : Pattern {
 
   // Inverts all chords in the progression.
   // steps: Number of inversions to apply to each chord.
-  // Returns: New Prog with inverted chords.
+  // Returns: New Pprog with inverted chords.
   invert { |steps|
     var newChords = chords.collect(_.invert(steps));
     ^Pprog(newChords);
   }
 
   // Reverses the order of chords in the progression.
-  // Returns: New Prog with reversed chord order.
+  // Returns: New Pprog with reversed chord order.
   reverse {
     ^Pprog(chords.reverse);
   }
 
   // Concatenates this progression with another.
-  // other: Another Prog to append.
-  // Returns: New combined Prog.
+  // other: Another Pprog to append.
+  // Returns: New combined Pprog.
   ++ { |other|
     ^Pprog(chords ++ other.chords);
   }
